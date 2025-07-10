@@ -2,33 +2,30 @@
 import React from 'react';
 import { Heart, MessageCircle, Share2, Eye, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Project } from '@/lib/supabase';
 
 interface ProjectCardProps {
-  project: {
-    id: string;
-    title: string;
-    description: string;
-    image: string;
-    author: {
-      name: string;
-      avatar: string;
-    };
-    stats: {
-      likes: number;
-      comments: number;
-      views: number;
-    };
-    tags: string[];
-  };
+  project: Project;
 }
 
 const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
+    
+    if (diffInHours < 1) return 'Just now';
+    if (diffInHours < 24) return `${diffInHours}h ago`;
+    if (diffInHours < 48) return 'Yesterday';
+    return date.toLocaleDateString();
+  };
+
   return (
     <div className="project-card bg-card rounded-xl overflow-hidden opacity-0 fade-in">
       {/* Image */}
       <div className="relative aspect-video overflow-hidden">
         <img
-          src={project.image}
+          src={project.image_url}
           alt={project.title}
           className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
         />
@@ -59,8 +56,8 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
               </div>
             </div>
             <div>
-              <h3 className="font-semibold text-foreground">{project.author.name}</h3>
-              <p className="text-sm text-muted-foreground">2 hours ago</p>
+              <h3 className="font-semibold text-foreground">Designer</h3>
+              <p className="text-sm text-muted-foreground">{formatDate(project.created_at)}</p>
             </div>
           </div>
         </div>
@@ -90,15 +87,15 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
           <div className="flex items-center space-x-4 text-sm text-muted-foreground">
             <div className="flex items-center space-x-1">
               <Eye className="w-4 h-4" />
-              <span>{project.stats.views}</span>
+              <span>{project.views_count}</span>
             </div>
             <div className="flex items-center space-x-1">
               <Heart className="w-4 h-4" />
-              <span>{project.stats.likes}</span>
+              <span>{project.likes_count}</span>
             </div>
             <div className="flex items-center space-x-1">
               <MessageCircle className="w-4 h-4" />
-              <span>{project.stats.comments}</span>
+              <span>{project.comments_count}</span>
             </div>
           </div>
 

@@ -1,11 +1,14 @@
+
 import React, { useState } from 'react';
 import { Search, Bell, User, Plus, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import AuthModal from './AuthModal';
+import ProjectUploadModal from './ProjectUploadModal';
 
 const Header = () => {
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [showUploadModal, setShowUploadModal] = useState(false);
   const { user, signOut } = useAuth();
 
   const handleSignOut = async () => {
@@ -55,7 +58,11 @@ const Header = () => {
           <div className="flex items-center space-x-3">
             {user ? (
               <>
-                <Button size="sm" className="glow-hover bg-primary hover:bg-primary/90">
+                <Button 
+                  size="sm" 
+                  className="glow-hover bg-primary hover:bg-primary/90"
+                  onClick={() => setShowUploadModal(true)}
+                >
                   <Plus className="w-4 h-4 mr-2" />
                   Upload
                 </Button>
@@ -92,6 +99,11 @@ const Header = () => {
       <AuthModal 
         isOpen={showAuthModal} 
         onClose={() => setShowAuthModal(false)} 
+      />
+      
+      <ProjectUploadModal 
+        isOpen={showUploadModal} 
+        onClose={() => setShowUploadModal(false)} 
       />
     </>
   );
