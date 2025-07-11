@@ -1,7 +1,21 @@
 
 import { useState, useEffect } from 'react'
-import { supabase, Project } from '@/lib/supabase'
+import { supabase } from '@/integrations/supabase/client'
 import { useAuth } from './useAuth'
+
+interface Project {
+  id: string
+  title: string
+  description: string
+  image_url: string
+  user_id: string
+  tags: string[]
+  likes_count: number
+  comments_count: number
+  views_count: number
+  created_at: string
+  updated_at: string
+}
 
 export function useProjects() {
   const [projects, setProjects] = useState<Project[]>([])

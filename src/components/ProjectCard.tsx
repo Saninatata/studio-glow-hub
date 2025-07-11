@@ -2,7 +2,20 @@
 import React from 'react';
 import { Heart, MessageCircle, Share2, Eye, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Project } from '@/lib/supabase';
+
+interface Project {
+  id: string
+  title: string
+  description: string
+  image_url: string
+  user_id: string
+  tags: string[]
+  likes_count: number
+  comments_count: number
+  views_count: number
+  created_at: string
+  updated_at: string
+}
 
 interface ProjectCardProps {
   project: Project;
