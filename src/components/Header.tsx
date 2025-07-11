@@ -1,11 +1,11 @@
-
 import React, { useState } from 'react';
-import { Search, Bell, User, Plus, LogOut, Menu } from 'lucide-react';
+import { Search, Bell, Plus, LogOut, Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { Link, useLocation } from 'react-router-dom';
 import AuthModal from './AuthModal';
 import ProjectUploadModal from './ProjectUploadModal';
+import ProfileButton from './ProfileButton';
 import {
   Drawer,
   DrawerClose,
@@ -171,19 +171,7 @@ const Header = () => {
                   <span className="absolute -top-1 -right-1 bg-primary w-2 h-2 rounded-full"></span>
                 </Button>
                 
-                <div className="flex items-center space-x-2">
-                  <span className="text-sm text-muted-foreground hidden sm:block">
-                    {user.full_name}
-                  </span>
-                  <Link to="/profile">
-                    <Button variant="ghost" size="icon">
-                      <User className="w-5 h-5" />
-                    </Button>
-                  </Link>
-                  <Button variant="ghost" size="icon" onClick={handleSignOut}>
-                    <LogOut className="w-4 h-4" />
-                  </Button>
-                </div>
+                <ProfileButton />
               </>
             ) : (
               <Button 

@@ -1,14 +1,15 @@
-
-import React from 'react';
+import React, { useState } from 'react';
 import { User, MapPin, Globe, Mail, Calendar, Edit3, Settings, Camera } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/hooks/useAuth';
 import Header from '@/components/Header';
+import ProfileEditModal from '@/components/ProfileEditModal';
 
 const Profile = () => {
   const { user } = useAuth();
+  const [showEditModal, setShowEditModal] = useState(false);
 
   if (!user) {
     return (
@@ -72,7 +73,7 @@ const Profile = () => {
                   </div>
 
                   <div className="flex space-x-2 mb-6">
-                    <Button className="flex-1">
+                    <Button className="flex-1" onClick={() => setShowEditModal(true)}>
                       <Edit3 className="w-4 h-4 mr-2" />
                       Edit Profile
                     </Button>
@@ -109,7 +110,6 @@ const Profile = () => {
               </CardContent>
             </Card>
 
-            {/* Skills */}
             <Card className="glass border-white/10 mt-6">
               <CardHeader>
                 <CardTitle>Skills</CardTitle>
@@ -126,10 +126,8 @@ const Profile = () => {
             </Card>
           </div>
 
-          {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
             
-            {/* Stats */}
             <div className="grid grid-cols-3 gap-4">
               <Card className="glass border-white/10 text-center">
                 <CardContent className="p-4">
@@ -151,7 +149,6 @@ const Profile = () => {
               </Card>
             </div>
 
-            {/* Recent Projects */}
             <Card className="glass border-white/10">
               <CardHeader>
                 <CardTitle>Recent Projects</CardTitle>
@@ -173,7 +170,6 @@ const Profile = () => {
               </CardContent>
             </Card>
 
-            {/* Activity Feed */}
             <Card className="glass border-white/10">
               <CardHeader>
                 <CardTitle>Recent Activity</CardTitle>
@@ -207,6 +203,11 @@ const Profile = () => {
           </div>
         </div>
       </div>
+
+      <ProfileEditModal 
+        isOpen={showEditModal} 
+        onClose={() => setShowEditModal(false)} 
+      />
     </div>
   );
 };
