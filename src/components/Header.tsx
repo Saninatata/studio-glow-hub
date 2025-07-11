@@ -1,15 +1,24 @@
 
 import React, { useState } from 'react';
-import { Search, Bell, User, Plus, LogOut } from 'lucide-react';
+import { Search, Bell, User, Plus, LogOut, Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { Link, useLocation } from 'react-router-dom';
 import AuthModal from './AuthModal';
 import ProjectUploadModal from './ProjectUploadModal';
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from '@/components/ui/drawer';
 
 const Header = () => {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showUploadModal, setShowUploadModal] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { user, signOut } = useAuth();
   const location = useLocation();
 
@@ -25,6 +34,32 @@ const Header = () => {
     return location.pathname === path;
   };
 
+  const navigationItems = [
+    { path: '/', label: 'Home' },
+    { path: '/projects', label: 'Projects' },
+    { path: '/posts', label: 'Posts' },
+    { path: '/freelance', label: 'Freelance' },
+  ];
+
+  const NavLinks = ({ mobile = false, onLinkClick = () => {} }) => (
+    <>
+      {navigationItems.map((item) => (
+        <Link
+          key={item.path}
+          to={item.path}
+          onClick={onLinkClick}
+          className={`transition-colors ${mobile ? 'block py-3 px-4 text-lg' : ''} ${
+            isActivePath(item.path)
+              ? 'text-primary font-medium'
+              : 'text-foreground hover:text-primary'
+          }`}
+        >
+          {item.label}
+        </Link>
+      ))}
+    </>
+  );
+
   return (
     <>
       <header className="sticky top-0 z-50 glass border-b border-white/10">
@@ -36,49 +71,77 @@ const Header = () => {
             </Link>
           </div>
 
-          {/* Navigation */}
+          {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
-            <Link 
-              to="/" 
-              className={`transition-colors ${
-                isActivePath('/') 
-                  ? 'text-primary font-medium' 
-                  : 'text-foreground hover:text-primary'
-              }`}
-            >
-              Home
-            </Link>
-            <Link 
-              to="/projects" 
-              className={`transition-colors ${
-                isActivePath('/projects') 
-                  ? 'text-primary font-medium' 
-                  : 'text-foreground hover:text-primary'
-              }`}
-            >
-              Projects
-            </Link>
-            <Link 
-              to="/posts" 
-              className={`transition-colors ${
-                isActivePath('/posts') 
-                  ? 'text-primary font-medium' 
-                  : 'text-foreground hover:text-primary'
-              }`}
-            >
-              Posts
-            </Link>
-            <Link 
-              to="/freelance" 
-              className={`transition-colors ${
-                isActivePath('/freelance') 
-                  ? 'text-primary font-medium' 
-                  : 'text-foreground hover:text-primary'
-              }`}
-            >
-              Freelance
-            </Link>
+            <NavLinks />
           </nav>
+
+          {/* Mobile Menu Button */}
+          <div className="md:hidden">
+            <Drawer open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+              <DrawerTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <Menu className="w-5 h-5" />
+                </Button>
+              </DrawerTrigger>
+              <DrawerContent>
+                <DrawerHeader>
+                  <DrawerTitle>Navigation</DrawerTitle>
+                </DrawerHeader>
+                <div className="px-4 py-2">
+                  <NavLinks mobile onLinkClick={() => setMobileMenuOpen(false)} />
+                  
+                  {user && (
+                    <div className="border-t border-border mt-4 pt-4">
+                      <Link
+                        to="/profile"
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="block py-3 px-4 text-lg text-foreground hover:text-primary transition-colors"
+                      >
+                        Profile
+                      </Link>
+                      <Button
+                        variant="ghost"
+                        onClick={() => {
+                          setMobileMenuOpen(false);
+                          setShowUploadModal(true);
+                        }}
+                        className="w-full justify-start text-lg py-3 px-4 h-auto"
+                      >
+                        <Plus className="w-4 h-4 mr-2" />
+                        Upload Project
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        onClick={() => {
+                          setMobileMenuOpen(false);
+                          handleSignOut();
+                        }}
+                        className="w-full justify-start text-lg py-3 px-4 h-auto text-red-500 hover:text-red-600"
+                      >
+                        <LogOut className="w-4 h-4 mr-2" />
+                        Sign Out
+                      </Button>
+                    </div>
+                  )}
+                  
+                  {!user && (
+                    <div className="border-t border-border mt-4 pt-4">
+                      <Button
+                        onClick={() => {
+                          setMobileMenuOpen(false);
+                          setShowAuthModal(true);
+                        }}
+                        className="w-full glow-hover bg-primary hover:bg-primary/90"
+                      >
+                        Join StudioLink
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </DrawerContent>
+            </Drawer>
+          </div>
 
           {/* Search Bar */}
           <div className="hidden lg:flex items-center bg-secondary/50 rounded-lg px-4 py-2 w-80">
@@ -90,8 +153,8 @@ const Header = () => {
             />
           </div>
 
-          {/* Actions */}
-          <div className="flex items-center space-x-3">
+          {/* Desktop Actions */}
+          <div className="hidden md:flex items-center space-x-3">
             {user ? (
               <>
                 <Button 
@@ -131,6 +194,19 @@ const Header = () => {
               </Button>
             )}
           </div>
+
+          {/* Mobile Auth Button (when not authenticated) */}
+          {!user && (
+            <div className="md:hidden">
+              <Button 
+                onClick={() => setShowAuthModal(true)}
+                className="glow-hover bg-primary hover:bg-primary/90"
+                size="sm"
+              >
+                Join
+              </Button>
+            </div>
+          )}
         </div>
       </header>
 
