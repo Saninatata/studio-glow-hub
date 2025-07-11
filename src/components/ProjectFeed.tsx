@@ -1,4 +1,3 @@
-
 import React from 'react';
 import ProjectCard from './ProjectCard';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';

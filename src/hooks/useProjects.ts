@@ -6,6 +6,7 @@ import { useAuth } from './useAuth'
 export function useProjects() {
   const [projects, setProjects] = useState<Project[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const { user } = useAuth()
 
   useEffect(() => {
@@ -14,6 +15,7 @@ export function useProjects() {
 
   const fetchProjects = async () => {
     try {
+      setError(null)
       const { data, error } = await supabase
         .from('projects')
         .select('*')
@@ -23,8 +25,35 @@ export function useProjects() {
       setProjects(data || [])
     } catch (error) {
       console.error('Error fetching projects:', error)
+      setError(error instanceof Error ? error.message : 'Failed to fetch projects')
     } finally {
       setLoading(false)
+    }
+  }
+
+  const createProject = async (projectData: {
+    title: string
+    description: string
+    image_url: string
+    tags: string[]
+    user_id: string
+  }) => {
+    try {
+      const { data, error } = await supabase
+        .from('projects')
+        .insert(projectData)
+        .select()
+        .single()
+
+      if (error) throw error
+      
+      // Refresh projects list
+      await fetchProjects()
+      
+      return data
+    } catch (error) {
+      console.error('Error creating project:', error)
+      throw error
     }
   }
 
@@ -47,17 +76,11 @@ export function useProjects() {
           .delete()
           .eq('project_id', projectId)
           .eq('user_id', user.id)
-
-        // Decrement likes count
-        await supabase.rpc('decrement_likes', { project_id: projectId })
       } else {
         // Like
         await supabase
           .from('project_likes')
           .insert({ project_id: projectId, user_id: user.id })
-
-        // Increment likes count
-        await supabase.rpc('increment_likes', { project_id: projectId })
       }
 
       // Refresh projects
@@ -79,9 +102,6 @@ export function useProjects() {
           content,
         })
 
-      // Increment comments count
-      await supabase.rpc('increment_comments', { project_id: projectId })
-
       // Refresh projects
       fetchProjects()
     } catch (error) {
@@ -92,6 +112,8 @@ export function useProjects() {
   return {
     projects,
     loading,
+    error,
+    createProject,
     likeProject,
     addComment,
     refetch: fetchProjects,
