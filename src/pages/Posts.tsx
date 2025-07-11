@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Heart, MessageCircle, Share2, Bookmark, MoreHorizontal, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -7,6 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
 import Header from '@/components/Header';
+import BottomNavigation from '@/components/BottomNavigation';
 import { useAuth } from '@/hooks/useAuth';
 
 const Posts = () => {
@@ -74,7 +74,7 @@ const Posts = () => {
     <div className="min-h-screen bg-background">
       <Header />
       
-      <div className="container mx-auto px-4 py-8 max-w-2xl">
+      <div className="container mx-auto px-4 py-8 pb-20 md:pb-8 max-w-2xl">
         {/* Page Header */}
         <div className="mb-8">
           <h1 className="text-4xl font-bold mb-2">
@@ -204,6 +204,8 @@ const Posts = () => {
           </Button>
         </div>
       </div>
+
+      <BottomNavigation />
     </div>
   );
 };

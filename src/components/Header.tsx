@@ -60,9 +60,11 @@ const Header = () => {
     </>
   );
 
+  const isAuthenticatedPage = ['/feed', '/posts', '/profile'].includes(location.pathname);
+
   return (
     <>
-      <header className="sticky top-0 z-50 glass border-b border-white/10">
+      <header className={`sticky top-0 z-50 glass border-b border-white/10 ${isAuthenticatedPage ? 'md:block hidden' : ''}`}>
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           {/* Logo */}
           <div className="flex items-center space-x-4">

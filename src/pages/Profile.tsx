@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/hooks/useAuth';
 import Header from '@/components/Header';
+import BottomNavigation from '@/components/BottomNavigation';
 import ProfileEditModal from '@/components/ProfileEditModal';
 
 const Profile = () => {
@@ -33,7 +34,7 @@ const Profile = () => {
     <div className="min-h-screen bg-background">
       <Header />
       
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-8 pb-20 md:pb-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           
           {/* Profile Info */}
@@ -204,6 +205,8 @@ const Profile = () => {
         </div>
       </div>
 
+      <BottomNavigation />
+      
       <ProfileEditModal 
         isOpen={showEditModal} 
         onClose={() => setShowEditModal(false)} 
