@@ -23,6 +23,7 @@ interface AuthContextType {
   loading: boolean
   signIn: (email: string, password: string) => Promise<void>
   signUp: (email: string, password: string, fullName: string) => Promise<void>
+  signInWithGoogle: () => Promise<void>
   signOut: () => Promise<void>
 }
 
@@ -49,7 +50,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } = supabase.auth.onAuthStateChange(async (event, session) => {
       setSupabaseUser(session?.user ?? null)
       if (session?.user) {
-        await fetchUserProfile(session.user.id)
+        // Defer profile fetching to prevent deadlocks
+        setTimeout(() => {
+          fetchUserProfile(session.user.id)
+        }, 0)
       } else {
         setUser(null)
       }
@@ -67,7 +71,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .eq('id', userId)
         .single()
 
-      if (error) throw error
+      if (error) {
+        console.error('Error fetching user profile:', error)
+        return
+      }
       setUser(data)
     } catch (error) {
       console.error('Error fetching user profile:', error)
@@ -83,9 +90,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   const signUp = async (email: string, password: string, fullName: string) => {
+    const redirectUrl = `${window.location.origin}/`
+    
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
+      options: {
+        emailRedirectTo: redirectUrl,
+        data: {
+          full_name: fullName,
+        }
+      }
     })
     if (error) throw error
 
@@ -95,14 +110,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .from('users')
         .insert({
           id: data.user.id,
-          email: data.user.email,
+          email: data.user.email || email,
           full_name: fullName,
           skills: [],
           is_freelancer: false,
         })
       
-      if (profileError) throw profileError
+      if (profileError) {
+        console.error('Error creating user profile:', profileError)
+        // Don't throw here as the user was created successfully
+      }
     }
+  }
+
+  const signInWithGoogle = async () => {
+    const redirectUrl = `${window.location.origin}/`
+    
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: redirectUrl,
+      }
+    })
+    if (error) throw error
   }
 
   const signOut = async () => {
@@ -116,6 +146,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     loading,
     signIn,
     signUp,
+    signInWithGoogle,
     signOut,
   }
 
