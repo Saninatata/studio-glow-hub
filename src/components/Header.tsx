@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { Search, Bell, User, Plus, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
+import { Link, useLocation } from 'react-router-dom';
 import AuthModal from './AuthModal';
 import ProjectUploadModal from './ProjectUploadModal';
 
@@ -10,6 +11,7 @@ const Header = () => {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showUploadModal, setShowUploadModal] = useState(false);
   const { user, signOut } = useAuth();
+  const location = useLocation();
 
   const handleSignOut = async () => {
     try {
@@ -19,29 +21,63 @@ const Header = () => {
     }
   };
 
+  const isActivePath = (path: string) => {
+    return location.pathname === path;
+  };
+
   return (
     <>
       <header className="sticky top-0 z-50 glass border-b border-white/10">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           {/* Logo */}
           <div className="flex items-center space-x-4">
-            <h1 className="text-2xl font-bold gradient-text">StudioLink</h1>
+            <Link to="/" className="text-2xl font-bold gradient-text hover:opacity-80 transition-opacity">
+              StudioLink
+            </Link>
           </div>
 
           {/* Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
-            <a href="#" className="text-foreground hover:text-primary transition-colors">
-              Explore
-            </a>
-            <a href="#" className="text-foreground hover:text-primary transition-colors">
+            <Link 
+              to="/" 
+              className={`transition-colors ${
+                isActivePath('/') 
+                  ? 'text-primary font-medium' 
+                  : 'text-foreground hover:text-primary'
+              }`}
+            >
+              Home
+            </Link>
+            <Link 
+              to="/projects" 
+              className={`transition-colors ${
+                isActivePath('/projects') 
+                  ? 'text-primary font-medium' 
+                  : 'text-foreground hover:text-primary'
+              }`}
+            >
               Projects
-            </a>
-            <a href="#" className="text-foreground hover:text-primary transition-colors">
+            </Link>
+            <Link 
+              to="/posts" 
+              className={`transition-colors ${
+                isActivePath('/posts') 
+                  ? 'text-primary font-medium' 
+                  : 'text-foreground hover:text-primary'
+              }`}
+            >
+              Posts
+            </Link>
+            <Link 
+              to="/freelance" 
+              className={`transition-colors ${
+                isActivePath('/freelance') 
+                  ? 'text-primary font-medium' 
+                  : 'text-foreground hover:text-primary'
+              }`}
+            >
               Freelance
-            </a>
-            <a href="#" className="text-foreground hover:text-primary transition-colors">
-              Community
-            </a>
+            </Link>
           </nav>
 
           {/* Search Bar */}
@@ -76,9 +112,11 @@ const Header = () => {
                   <span className="text-sm text-muted-foreground hidden sm:block">
                     {user.full_name}
                   </span>
-                  <Button variant="ghost" size="icon">
-                    <User className="w-5 h-5" />
-                  </Button>
+                  <Link to="/profile">
+                    <Button variant="ghost" size="icon">
+                      <User className="w-5 h-5" />
+                    </Button>
+                  </Link>
                   <Button variant="ghost" size="icon" onClick={handleSignOut}>
                     <LogOut className="w-4 h-4" />
                   </Button>
