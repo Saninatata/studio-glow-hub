@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Search, Bell, Plus, LogOut, Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -6,6 +7,7 @@ import { Link, useLocation } from 'react-router-dom';
 import AuthModal from './AuthModal';
 import ProjectUploadModal from './ProjectUploadModal';
 import ProfileButton from './ProfileButton';
+import PostOptionsModal from './PostOptionsModal';
 import {
   Drawer,
   DrawerClose,
@@ -18,6 +20,7 @@ import {
 const Header = () => {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showUploadModal, setShowUploadModal] = useState(false);
+  const [showPostOptions, setShowPostOptions] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { user, signOut } = useAuth();
   const location = useLocation();
@@ -59,6 +62,25 @@ const Header = () => {
       ))}
     </>
   );
+
+  const handlePostOptionSelect = (option: 'post' | 'project' | 'job' | 'talent') => {
+    switch (option) {
+      case 'post':
+        window.location.href = '/posts';
+        break;
+      case 'project':
+        window.location.href = '/projects';
+        break;
+      case 'job':
+        window.location.href = '/freelance';
+        break;
+      case 'talent':
+        window.location.href = '/freelance';
+        break;
+      default:
+        window.location.href = '/posts';
+    }
+  };
 
   const isAuthenticatedPage = ['/feed', '/posts', '/profile'].includes(location.pathname);
 
@@ -106,12 +128,12 @@ const Header = () => {
                         variant="ghost"
                         onClick={() => {
                           setMobileMenuOpen(false);
-                          setShowUploadModal(true);
+                          setShowPostOptions(true);
                         }}
                         className="w-full justify-start text-lg py-3 px-4 h-auto"
                       >
                         <Plus className="w-4 h-4 mr-2" />
-                        Upload Project
+                        Create Post
                       </Button>
                       <Button
                         variant="ghost"
@@ -162,10 +184,10 @@ const Header = () => {
                 <Button 
                   size="sm" 
                   className="glow-hover bg-primary hover:bg-primary/90"
-                  onClick={() => setShowUploadModal(true)}
+                  onClick={() => setShowPostOptions(true)}
                 >
                   <Plus className="w-4 h-4 mr-2" />
-                  Upload
+                  Create
                 </Button>
                 
                 <Button variant="ghost" size="icon" className="relative">
@@ -208,6 +230,12 @@ const Header = () => {
       <ProjectUploadModal 
         isOpen={showUploadModal} 
         onClose={() => setShowUploadModal(false)} 
+      />
+
+      <PostOptionsModal
+        isOpen={showPostOptions}
+        onClose={() => setShowPostOptions(false)}
+        onSelectOption={handlePostOptionSelect}
       />
     </>
   );

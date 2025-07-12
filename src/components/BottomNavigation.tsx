@@ -1,31 +1,30 @@
 
 import React, { useState } from 'react';
 import { Home, Plus, User } from 'lucide-react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import PostOptionsModal from './PostOptionsModal';
 
 const BottomNavigation = () => {
   const location = useLocation();
-  const navigate = useNavigate();
   const [showPostOptions, setShowPostOptions] = useState(false);
 
   const handlePostOptionSelect = (option: 'post' | 'project' | 'job' | 'talent') => {
     switch (option) {
       case 'post':
-        navigate('/posts');
+        window.location.href = '/posts';
         break;
       case 'project':
-        navigate('/projects');
+        window.location.href = '/projects';
         break;
       case 'job':
-        navigate('/freelance');
+        window.location.href = '/freelance';
         break;
       case 'talent':
-        navigate('/freelance');
+        window.location.href = '/freelance';
         break;
       default:
-        navigate('/posts');
+        window.location.href = '/posts';
     }
   };
 
