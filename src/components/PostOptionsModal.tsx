@@ -1,16 +1,21 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { X, MessageSquare, Briefcase, Users, Lightbulb } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import CreatePostModal from './CreatePostModal';
+import ProjectUploadModal from './ProjectUploadModal';
+import CreateJobModal from './CreateJobModal';
+import CreateTalentModal from './CreateTalentModal';
 
 interface PostOptionsModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSelectOption: (option: 'post' | 'project' | 'job' | 'talent') => void;
 }
 
-const PostOptionsModal = ({ isOpen, onClose, onSelectOption }: PostOptionsModalProps) => {
+const PostOptionsModal = ({ isOpen, onClose }: PostOptionsModalProps) => {
+  const [activeModal, setActiveModal] = useState<string | null>(null);
+
   const options = [
     {
       id: 'post' as const,
@@ -43,42 +48,69 @@ const PostOptionsModal = ({ isOpen, onClose, onSelectOption }: PostOptionsModalP
   ];
 
   const handleOptionSelect = (optionId: 'post' | 'project' | 'job' | 'talent') => {
-    onSelectOption(optionId);
-    onClose();
+    setActiveModal(optionId);
+    onClose(); // Close the main options modal
+  };
+
+  const handleCloseModal = () => {
+    setActiveModal(null);
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle className="text-center">What would you like to create?</DialogTitle>
-        </DialogHeader>
-        
-        <div className="grid gap-3 py-4">
-          {options.map((option) => {
-            const Icon = option.icon;
-            return (
-              <Button
-                key={option.id}
-                variant="ghost"
-                className="flex items-start p-4 h-auto text-left hover:bg-accent"
-                onClick={() => handleOptionSelect(option.id)}
-              >
-                <div className={`p-3 rounded-lg ${option.color} text-white mr-4 flex-shrink-0`}>
-                  <Icon className="w-6 h-6" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-semibold text-foreground">{option.title}</h3>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    {option.description}
-                  </p>
-                </div>
-              </Button>
-            );
-          })}
-        </div>
-      </DialogContent>
-    </Dialog>
+    <>
+      <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-center">What would you like to create?</DialogTitle>
+          </DialogHeader>
+          
+          <div className="grid gap-3 py-4">
+            {options.map((option) => {
+              const Icon = option.icon;
+              return (
+                <Button
+                  key={option.id}
+                  variant="ghost"
+                  className="flex items-start p-4 h-auto text-left hover:bg-accent"
+                  onClick={() => handleOptionSelect(option.id)}
+                >
+                  <div className={`p-3 rounded-lg ${option.color} text-white mr-4 flex-shrink-0`}>
+                    <Icon className="w-6 h-6" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-foreground">{option.title}</h3>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {option.description}
+                    </p>
+                  </div>
+                </Button>
+              );
+            })}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Individual Modals */}
+      <CreatePostModal
+        isOpen={activeModal === 'post'}
+        onClose={handleCloseModal}
+      />
+
+      <ProjectUploadModal
+        isOpen={activeModal === 'project'}
+        onClose={handleCloseModal}
+      />
+
+      <CreateJobModal
+        isOpen={activeModal === 'job'}
+        onClose={handleCloseModal}
+      />
+
+      <CreateTalentModal
+        isOpen={activeModal === 'talent'}
+        onClose={handleCloseModal}
+      />
+    </>
   );
 };
 
