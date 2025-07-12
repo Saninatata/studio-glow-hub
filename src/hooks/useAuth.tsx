@@ -48,6 +48,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('Auth state changed:', event, session?.user?.id)
       setSupabaseUser(session?.user ?? null)
       if (session?.user) {
         // Defer profile fetching to prevent deadlocks
@@ -90,7 +91,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   const signUp = async (email: string, password: string, fullName: string) => {
-    const redirectUrl = `${window.location.origin}/`
+    const redirectUrl = `${window.location.origin}/feed`
     
     const { data, error } = await supabase.auth.signUp({
       email,
@@ -124,7 +125,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   const signInWithGoogle = async () => {
-    const redirectUrl = `${window.location.origin}/`
+    const redirectUrl = `${window.location.origin}/feed`
     
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',

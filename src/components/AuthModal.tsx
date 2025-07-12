@@ -1,10 +1,10 @@
-
 import React, { useState } from 'react'
 import { X, Mail, Lock, User } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useAuth } from '@/hooks/useAuth'
 import { useToast } from '@/hooks/use-toast'
+import { useNavigate } from 'react-router-dom'
 
 interface AuthModalProps {
   isOpen: boolean
@@ -19,6 +19,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
   const [loading, setLoading] = useState(false)
   const { signIn, signUp, signInWithGoogle } = useAuth()
   const { toast } = useToast()
+  const navigate = useNavigate()
 
   if (!isOpen) return null
 
@@ -36,8 +37,9 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
       } else {
         await signIn(email, password)
         toast({ title: 'Welcome back!' })
+        onClose()
+        navigate('/feed') // Redirect to feed after successful login
       }
-      onClose()
     } catch (error: any) {
       toast({
         title: 'Error',
@@ -55,6 +57,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
       await signInWithGoogle()
       toast({ title: 'Signing in with Google...' })
       onClose()
+      navigate('/feed') // Redirect to feed after successful Google login
     } catch (error: any) {
       toast({
         title: 'Error',
