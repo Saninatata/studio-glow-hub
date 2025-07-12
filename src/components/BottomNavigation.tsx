@@ -9,25 +9,6 @@ const BottomNavigation = () => {
   const location = useLocation();
   const [showPostOptions, setShowPostOptions] = useState(false);
 
-  const handlePostOptionSelect = (option: 'post' | 'project' | 'job' | 'talent') => {
-    switch (option) {
-      case 'post':
-        window.location.href = '/posts';
-        break;
-      case 'project':
-        window.location.href = '/projects';
-        break;
-      case 'job':
-        window.location.href = '/freelance';
-        break;
-      case 'talent':
-        window.location.href = '/freelance';
-        break;
-      default:
-        window.location.href = '/posts';
-    }
-  };
-
   const navItems = [
     {
       icon: Home,
@@ -102,7 +83,6 @@ const BottomNavigation = () => {
       <PostOptionsModal
         isOpen={showPostOptions}
         onClose={() => setShowPostOptions(false)}
-        onSelectOption={handlePostOptionSelect}
       />
     </>
   );

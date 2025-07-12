@@ -63,25 +63,6 @@ const Header = () => {
     </>
   );
 
-  const handlePostOptionSelect = (option: 'post' | 'project' | 'job' | 'talent') => {
-    switch (option) {
-      case 'post':
-        window.location.href = '/posts';
-        break;
-      case 'project':
-        window.location.href = '/projects';
-        break;
-      case 'job':
-        window.location.href = '/freelance';
-        break;
-      case 'talent':
-        window.location.href = '/freelance';
-        break;
-      default:
-        window.location.href = '/posts';
-    }
-  };
-
   const isAuthenticatedPage = ['/feed', '/posts', '/profile'].includes(location.pathname);
 
   return (
@@ -235,7 +216,6 @@ const Header = () => {
       <PostOptionsModal
         isOpen={showPostOptions}
         onClose={() => setShowPostOptions(false)}
-        onSelectOption={handlePostOptionSelect}
       />
     </>
   );

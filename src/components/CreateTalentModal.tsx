@@ -1,210 +1,228 @@
 
-import React, { useState } from 'react'
-import { X, Users, Star, MapPin, DollarSign } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
-import { useAuth } from '@/hooks/useAuth'
-import { toast } from '@/components/ui/use-toast'
+import React, { useState } from 'react';
+import { X, Upload, DollarSign, MapPin, Clock } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
+import { useToast } from '@/hooks/use-toast';
 
 interface CreateTalentModalProps {
-  isOpen: boolean
-  onClose: () => void
+  isOpen: boolean;
+  onClose: () => void;
 }
 
-const CreateTalentModal: React.FC<CreateTalentModalProps> = ({ isOpen, onClose }) => {
-  const [title, setTitle] = useState('')
-  const [skills, setSkills] = useState('')
-  const [experience, setExperience] = useState('')
-  const [location, setLocation] = useState('')
-  const [hourlyRate, setHourlyRate] = useState('')
-  const [availability, setAvailability] = useState('full-time')
-  const [portfolio, setPortfolio] = useState('')
-  const [bio, setBio] = useState('')
-  const [services, setServices] = useState('')
-  const [loading, setLoading] = useState(false)
-  const { user } = useAuth()
+const CreateTalentModal = ({ isOpen, onClose }: CreateTalentModalProps) => {
+  const [formData, setFormData] = useState({
+    title: '',
+    description: '',
+    skills: [] as string[],
+    hourlyRate: '',
+    availability: '',
+    location: '',
+    experience: ''
+  });
+  const [newSkill, setNewSkill] = useState('');
+  const [loading, setLoading] = useState(false);
+  const { toast } = useToast();
 
-  if (!isOpen) return null
+  const handleInputChange = (field: string, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const addSkill = () => {
+    if (newSkill.trim() && !formData.skills.includes(newSkill.trim())) {
+      setFormData(prev => ({
+        ...prev,
+        skills: [...prev.skills, newSkill.trim()]
+      }));
+      setNewSkill('');
+    }
+  };
+
+  const removeSkill = (skillToRemove: string) => {
+    setFormData(prev => ({
+      ...prev,
+      skills: prev.skills.filter(skill => skill !== skillToRemove)
+    }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!user) {
-      toast({ title: 'Please sign in to offer your talent', variant: 'destructive' })
-      return
-    }
+    e.preventDefault();
+    setLoading(true);
 
-    if (!title.trim() || !skills.trim() || !bio.trim()) {
-      toast({ title: 'Please fill in all required fields', variant: 'descriptive' })
-      return
-    }
-
-    setLoading(true)
     try {
       // Here you would typically save to database
-      toast({ title: 'Talent profile created successfully!' })
-      onClose()
+      console.log('Talent offer data:', formData);
       
-      // Reset form
-      setTitle('')
-      setSkills('')
-      setExperience('')
-      setLocation('')
-      setHourlyRate('')
-      setAvailability('full-time')
-      setPortfolio('')
-      setBio('')
-      setServices('')
-    } catch (error: any) {
       toast({
-        title: 'Failed to create talent profile',
-        description: error.message,
-        variant: 'destructive',
-      })
+        title: "Talent offer created successfully!",
+        description: "Your talent profile is now visible to potential clients.",
+      });
+      
+      onClose();
+      // Reset form
+      setFormData({
+        title: '',
+        description: '',
+        skills: [],
+        hourlyRate: '',
+        availability: '',
+        location: '',
+        experience: ''
+      });
+    } catch (error) {
+      toast({
+        title: "Error creating talent offer",
+        description: "Please try again later.",
+        variant: "destructive",
+      });
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
+
+  if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-      <div className="glass rounded-xl p-8 w-full max-w-3xl mx-4 max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold gradient-text">Offer Your Talent</h2>
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div className="bg-card rounded-lg border max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="flex items-center justify-between p-6 border-b">
+          <h2 className="text-xl font-semibold">Offer Your Talent</h2>
           <Button variant="ghost" size="icon" onClick={onClose}>
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </Button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium mb-2">Professional Title *</label>
-              <Input
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="e.g. Senior UI/UX Designer"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-2">Years of Experience</label>
-              <div className="relative">
-                <Star className="absolute left-3 top-3 w-5 h-5 text-muted-foreground" />
-                <Input
-                  value={experience}
-                  onChange={(e) => setExperience(e.target.value)}
-                  placeholder="e.g. 5+ years"
-                  className="pl-12"
-                />
-              </div>
-            </div>
-          </div>
-
+        <form onSubmit={handleSubmit} className="p-6 space-y-6">
           <div>
-            <label className="block text-sm font-medium mb-2">Skills & Expertise *</label>
+            <Label htmlFor="title">Service Title</Label>
             <Input
-              value={skills}
-              onChange={(e) => setSkills(e.target.value)}
-              placeholder="e.g. Figma, Adobe Creative Suite, User Research, Prototyping"
+              id="title"
+              value={formData.title}
+              onChange={(e) => handleInputChange('title', e.target.value)}
+              placeholder="e.g., UI/UX Designer Available for Hire"
               required
             />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <label className="block text-sm font-medium mb-2">Location</label>
-              <div className="relative">
-                <MapPin className="absolute left-3 top-3 w-5 h-5 text-muted-foreground" />
-                <Input
-                  value={location}
-                  onChange={(e) => setLocation(e.target.value)}
-                  placeholder="New York, NY"
-                  className="pl-12"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-2">Hourly Rate</label>
-              <div className="relative">
-                <DollarSign className="absolute left-3 top-3 w-5 h-5 text-muted-foreground" />
-                <Input
-                  value={hourlyRate}
-                  onChange={(e) => setHourlyRate(e.target.value)}
-                  placeholder="$75/hour"
-                  className="pl-12"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-2">Availability</label>
-              <select
-                value={availability}
-                onChange={(e) => setAvailability(e.target.value)}
-                className="w-full px-4 py-2 border border-input bg-background rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
-              >
-                <option value="full-time">Full-time</option>
-                <option value="part-time">Part-time</option>
-                <option value="project-based">Project-based</option>
-                <option value="consultation">Consultation</option>
-              </select>
-            </div>
-          </div>
-
           <div>
-            <label className="block text-sm font-medium mb-2">Portfolio URL</label>
-            <Input
-              value={portfolio}
-              onChange={(e) => setPortfolio(e.target.value)}
-              placeholder="https://yourportfolio.com"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-2">Professional Bio *</label>
+            <Label htmlFor="description">Description</Label>
             <Textarea
-              value={bio}
-              onChange={(e) => setBio(e.target.value)}
-              placeholder="Tell potential clients about your background, experience, and what makes you unique..."
+              id="description"
+              value={formData.description}
+              onChange={(e) => handleInputChange('description', e.target.value)}
+              placeholder="Describe your services, experience, and what makes you unique..."
               rows={4}
               required
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2">Services Offered</label>
-            <Textarea
-              value={services}
-              onChange={(e) => setServices(e.target.value)}
-              placeholder="List the specific services you provide (e.g., Website design, Mobile app design, Brand identity, User research...)"
-              rows={3}
-            />
+            <Label>Skills</Label>
+            <div className="flex flex-wrap gap-2 mb-2">
+              {formData.skills.map((skill) => (
+                <Badge
+                  key={skill}
+                  variant="secondary"
+                  className="bg-primary/20 text-primary hover:bg-primary/30 cursor-pointer"
+                  onClick={() => removeSkill(skill)}
+                >
+                  {skill} ×
+                </Badge>
+              ))}
+            </div>
+            <div className="flex gap-2">
+              <Input
+                value={newSkill}
+                onChange={(e) => setNewSkill(e.target.value)}
+                placeholder="Add a skill"
+                onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addSkill())}
+              />
+              <Button type="button" onClick={addSkill} variant="outline">
+                Add
+              </Button>
+            </div>
           </div>
 
-          <div className="flex justify-end space-x-3 pt-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="hourlyRate">Hourly Rate (USD)</Label>
+              <div className="relative">
+                <DollarSign className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
+                <Input
+                  id="hourlyRate"
+                  type="number"
+                  value={formData.hourlyRate}
+                  onChange={(e) => handleInputChange('hourlyRate', e.target.value)}
+                  placeholder="50"
+                  className="pl-10"
+                  required
+                />
+              </div>
+            </div>
+
+            <div>
+              <Label htmlFor="location">Location</Label>
+              <div className="relative">
+                <MapPin className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
+                <Input
+                  id="location"
+                  value={formData.location}
+                  onChange={(e) => handleInputChange('location', e.target.value)}
+                  placeholder="Remote / City, Country"
+                  className="pl-10"
+                  required
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="availability">Availability</Label>
+              <div className="relative">
+                <Clock className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
+                <Input
+                  id="availability"
+                  value={formData.availability}
+                  onChange={(e) => handleInputChange('availability', e.target.value)}
+                  placeholder="Full-time / Part-time / Contract"
+                  className="pl-10"
+                  required
+                />
+              </div>
+            </div>
+
+            <div>
+              <Label htmlFor="experience">Years of Experience</Label>
+              <Input
+                id="experience"
+                type="number"
+                value={formData.experience}
+                onChange={(e) => handleInputChange('experience', e.target.value)}
+                placeholder="3"
+                required
+              />
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-3 pt-4 border-t">
             <Button type="button" variant="outline" onClick={onClose}>
               Cancel
             </Button>
-            <Button
-              type="submit"
-              className="glow-primary"
-              disabled={loading}
-            >
-              {loading ? 'Creating...' : (
-                <>
-                  <Users className="w-4 h-4 mr-2" />
-                  Create Profile
-                </>
-              )}
+            <Button type="submit" disabled={loading}>
+              {loading ? 'Publishing...' : 'Publish Talent Offer'}
             </Button>
           </div>
         </form>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default CreateTalentModal
+export default CreateTalentModal;
