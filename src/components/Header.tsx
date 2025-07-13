@@ -148,7 +148,7 @@ const Header = () => {
             </Drawer>
           </div>
 
-          {/* Search Bar */}
+          {/* Search Bar - Always show on desktop */}
           <div className="hidden lg:flex items-center bg-secondary/50 rounded-lg px-4 py-2 w-80">
             <Search className="w-4 h-4 text-muted-foreground mr-3" />
             <input
@@ -188,8 +188,8 @@ const Header = () => {
             )}
           </div>
 
-          {/* Mobile Auth Button (when not authenticated) */}
-          {!user && (
+          {/* Mobile Auth Button (when not authenticated) - Only show on non-auth pages */}
+          {!user && !isAuthenticatedPage && (
             <div className="md:hidden">
               <Button 
                 onClick={() => setShowAuthModal(true)}

@@ -50,6 +50,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log('Auth state changed:', event, session?.user?.id)
       setSupabaseUser(session?.user ?? null)
+      
       if (session?.user) {
         // Defer profile fetching to prevent deadlocks
         setTimeout(() => {
@@ -70,15 +71,52 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .from('users')
         .select('*')
         .eq('id', userId)
-        .single()
+        .maybeSingle()
 
-      if (error) {
+      if (error && error.code !== 'PGRST116') {
         console.error('Error fetching user profile:', error)
         return
       }
+
+      if (!data) {
+        // User profile doesn't exist, create a basic one
+        console.log('User profile not found, creating basic profile')
+        await createUserProfile(userId)
+        return
+      }
+
       setUser(data)
     } catch (error) {
       console.error('Error fetching user profile:', error)
+    }
+  }
+
+  const createUserProfile = async (userId: string) => {
+    try {
+      const { data: authUser } = await supabase.auth.getUser()
+      
+      const profileData = {
+        id: userId,
+        email: authUser.user?.email || '',
+        full_name: authUser.user?.user_metadata?.full_name || authUser.user?.email?.split('@')[0] || 'User',
+        skills: [],
+        is_freelancer: false,
+      }
+
+      const { data, error } = await supabase
+        .from('users')
+        .insert(profileData)
+        .select()
+        .single()
+
+      if (error) {
+        console.error('Error creating user profile:', error)
+        return
+      }
+
+      setUser(data)
+    } catch (error) {
+      console.error('Error creating user profile:', error)
     }
   }
 
@@ -105,22 +143,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     })
     if (error) throw error
 
-    if (data.user) {
-      // Create user profile
-      const { error: profileError } = await supabase
-        .from('users')
-        .insert({
-          id: data.user.id,
-          email: data.user.email || email,
-          full_name: fullName,
-          skills: [],
-          is_freelancer: false,
-        })
-      
-      if (profileError) {
-        console.error('Error creating user profile:', profileError)
-        // Don't throw here as the user was created successfully
-      }
+    // If user is created immediately (no email confirmation required)
+    if (data.user && !data.user.email_confirmed_at) {
+      console.log('User created, waiting for email confirmation')
     }
   }
 

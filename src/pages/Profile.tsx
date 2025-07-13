@@ -9,8 +9,21 @@ import BottomNavigation from '@/components/BottomNavigation';
 import ProfileEditModal from '@/components/ProfileEditModal';
 
 const Profile = () => {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const [showEditModal, setShowEditModal] = useState(false);
+
+  // Show loading state while checking authentication
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <div className="container mx-auto px-4 py-16 text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-muted-foreground">Loading profile...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!user) {
     return (
@@ -18,6 +31,10 @@ const Profile = () => {
         <Header />
         <div className="container mx-auto px-4 py-16 text-center">
           <h1 className="text-2xl font-bold mb-4">Please sign in to view your profile</h1>
+          <p className="text-muted-foreground mb-6">You need to be logged in to access your profile page.</p>
+          <Button onClick={() => window.location.href = '/'}>
+            Go to Home
+          </Button>
         </div>
       </div>
     );
