@@ -4,6 +4,7 @@ import { User, Edit3, LogOut, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { Link } from 'react-router-dom';
+import { cleanupAuthState } from '@/utils/authCleanup';
 import ProfileEditModal from './ProfileEditModal';
 import {
   DropdownMenu,
@@ -19,9 +20,24 @@ const ProfileButton = () => {
 
   const handleSignOut = async () => {
     try {
-      await signOut();
+      console.log('Starting sign out process...');
+      // Clean up auth state first
+      cleanupAuthState();
+      
+      // Attempt global sign out
+      try {
+        await signOut();
+      } catch (err) {
+        console.log('Sign out error (continuing anyway):', err);
+      }
+      
+      // Force page reload for completely clean state
+      window.location.href = '/';
     } catch (error) {
-      console.error('Error signing out:', error);
+      console.error('Error during sign out:', error);
+      // Even if there's an error, force cleanup and redirect
+      cleanupAuthState();
+      window.location.href = '/';
     }
   };
 

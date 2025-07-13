@@ -1,10 +1,11 @@
+
 import React, { useState } from 'react'
 import { X, Mail, Lock, User } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useAuth } from '@/hooks/useAuth'
 import { useToast } from '@/hooks/use-toast'
-import { useNavigate } from 'react-router-dom'
+import { cleanupAuthState } from '@/utils/authCleanup'
 import ProfileSetupModal from './ProfileSetupModal'
 
 interface AuthModalProps {
@@ -21,7 +22,6 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
   const [showProfileSetup, setShowProfileSetup] = useState(false)
   const { signIn, signUp, signInWithGoogle } = useAuth()
   const { toast } = useToast()
-  const navigate = useNavigate()
 
   if (!isOpen && !showProfileSetup) return null
 
@@ -30,6 +30,9 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
     setLoading(true)
 
     try {
+      // Clean up existing state before any auth operation
+      cleanupAuthState()
+      
       if (isSignUp) {
         await signUp(email, password, fullName)
         toast({ 
@@ -37,14 +40,21 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
           description: 'Please check your email to verify your account.'
         })
         onClose()
-        setShowProfileSetup(true) // Show profile setup after signup
+        // Force page refresh for clean state
+        setTimeout(() => {
+          window.location.href = '/feed'
+        }, 1000)
       } else {
         await signIn(email, password)
         toast({ title: 'Welcome back!' })
         onClose()
-        navigate('/feed') // Redirect to feed after successful login
+        // Force page refresh for clean state
+        setTimeout(() => {
+          window.location.href = '/feed'
+        }, 500)
       }
     } catch (error: any) {
+      console.error('Authentication error:', error)
       toast({
         title: 'Error',
         description: error.message || 'An error occurred during authentication',
@@ -58,11 +68,17 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
   const handleGoogleSignIn = async () => {
     setLoading(true)
     try {
+      // Clean up existing state before Google auth
+      cleanupAuthState()
       await signInWithGoogle()
       toast({ title: 'Signing in with Google...' })
       onClose()
-      navigate('/feed') // Redirect to feed after successful Google login
+      // Force page refresh for clean state
+      setTimeout(() => {
+        window.location.href = '/feed'
+      }, 1000)
     } catch (error: any) {
+      console.error('Google sign-in error:', error)
       toast({
         title: 'Error',
         description: error.message || 'Failed to sign in with Google',

@@ -2,6 +2,7 @@
 import React, { useState, useEffect, createContext, useContext } from 'react'
 import { User as SupabaseUser } from '@supabase/supabase-js'
 import { supabase } from '@/integrations/supabase/client'
+import { cleanupAuthState } from '@/utils/authCleanup'
 
 interface User {
   id: string
@@ -134,6 +135,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signIn = async (email: string, password: string) => {
     setLoading(true)
+    
+    // Clean up any existing auth state first
+    cleanupAuthState()
+    
+    // Attempt global sign out to clear any existing sessions
+    try {
+      await supabase.auth.signOut({ scope: 'global' })
+    } catch (err) {
+      console.log('Pre-signin cleanup error (continuing):', err)
+    }
+    
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -145,6 +157,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   const signUp = async (email: string, password: string, fullName: string) => {
+    // Clean up any existing auth state first
+    cleanupAuthState()
+    
     const redirectUrl = `${window.location.origin}/feed`
     
     const { data, error } = await supabase.auth.signUp({
@@ -166,6 +181,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   const signInWithGoogle = async () => {
+    // Clean up any existing auth state first
+    cleanupAuthState()
+    
     const redirectUrl = `${window.location.origin}/feed`
     
     const { error } = await supabase.auth.signInWithOAuth({
@@ -179,7 +197,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signOut = async () => {
     setLoading(true)
-    const { error } = await supabase.auth.signOut()
+    
+    // Clean up auth state first
+    cleanupAuthState()
+    
+    const { error } = await supabase.auth.signOut({ scope: 'global' })
     if (error) {
       setLoading(false)
       throw error
