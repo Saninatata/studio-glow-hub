@@ -37,11 +37,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log('Initial session:', session?.user?.id)
       setSupabaseUser(session?.user ?? null)
       if (session?.user) {
         fetchUserProfile(session.user.id)
+      } else {
+        setLoading(false)
       }
-      setLoading(false)
     })
 
     // Listen for auth changes
@@ -58,8 +60,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }, 0)
       } else {
         setUser(null)
+        setLoading(false)
       }
-      setLoading(false)
     })
 
     return () => subscription.unsubscribe()
@@ -67,6 +69,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const fetchUserProfile = async (userId: string) => {
     try {
+      console.log('Fetching user profile for:', userId)
       const { data, error } = await supabase
         .from('users')
         .select('*')
@@ -75,6 +78,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (error && error.code !== 'PGRST116') {
         console.error('Error fetching user profile:', error)
+        setLoading(false)
         return
       }
 
@@ -85,14 +89,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return
       }
 
+      console.log('User profile loaded:', data)
       setUser(data)
+      setLoading(false)
     } catch (error) {
       console.error('Error fetching user profile:', error)
+      setLoading(false)
     }
   }
 
   const createUserProfile = async (userId: string) => {
     try {
+      console.log('Creating user profile for:', userId)
       const { data: authUser } = await supabase.auth.getUser()
       
       const profileData = {
@@ -111,21 +119,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (error) {
         console.error('Error creating user profile:', error)
+        setLoading(false)
         return
       }
 
+      console.log('User profile created:', data)
       setUser(data)
+      setLoading(false)
     } catch (error) {
       console.error('Error creating user profile:', error)
+      setLoading(false)
     }
   }
 
   const signIn = async (email: string, password: string) => {
+    setLoading(true)
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
     })
-    if (error) throw error
+    if (error) {
+      setLoading(false)
+      throw error
+    }
   }
 
   const signUp = async (email: string, password: string, fullName: string) => {
@@ -162,8 +178,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   const signOut = async () => {
+    setLoading(true)
     const { error } = await supabase.auth.signOut()
-    if (error) throw error
+    if (error) {
+      setLoading(false)
+      throw error
+    }
+    setUser(null)
+    setSupabaseUser(null)
+    setLoading(false)
   }
 
   const value = {

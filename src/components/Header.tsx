@@ -22,7 +22,7 @@ const Header = () => {
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [showPostOptions, setShowPostOptions] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const { user, signOut } = useAuth();
+  const { user, signOut, loading } = useAuth();
   const location = useLocation();
 
   const handleSignOut = async () => {
@@ -63,11 +63,10 @@ const Header = () => {
     </>
   );
 
-  const isAuthenticatedPage = ['/feed', '/posts', '/profile'].includes(location.pathname);
-
+  // Don't hide header on any page - always show it
   return (
     <>
-      <header className={`sticky top-0 z-50 glass border-b border-white/10 ${isAuthenticatedPage ? 'md:block hidden' : ''}`}>
+      <header className="sticky top-0 z-50 glass border-b border-white/10">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           {/* Logo */}
           <div className="flex items-center space-x-4">
@@ -130,7 +129,7 @@ const Header = () => {
                     </div>
                   )}
                   
-                  {!user && (
+                  {!user && !loading && (
                     <div className="border-t border-border mt-4 pt-4">
                       <Button
                         onClick={() => {
@@ -178,6 +177,8 @@ const Header = () => {
                 
                 <ProfileButton />
               </>
+            ) : loading ? (
+              <div className="w-20 h-9 bg-secondary/50 rounded animate-pulse"></div>
             ) : (
               <Button 
                 onClick={() => setShowAuthModal(true)}
@@ -188,8 +189,8 @@ const Header = () => {
             )}
           </div>
 
-          {/* Mobile Auth Button (when not authenticated) - Only show on non-auth pages */}
-          {!user && !isAuthenticatedPage && (
+          {/* Mobile Auth Button (when not authenticated) */}
+          {!user && !loading && (
             <div className="md:hidden">
               <Button 
                 onClick={() => setShowAuthModal(true)}
