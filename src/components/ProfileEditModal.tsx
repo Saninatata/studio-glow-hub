@@ -20,6 +20,7 @@ const ProfileEditModal = ({ isOpen, onClose }: ProfileEditModalProps) => {
   const { user, supabaseUser } = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [formData, setFormData] = useState({
     full_name: '',
     bio: '',
@@ -28,6 +29,7 @@ const ProfileEditModal = ({ isOpen, onClose }: ProfileEditModalProps) => {
     skills: [] as string[],
     is_freelancer: false,
     hourly_rate: '',
+    avatar_url: '',
   });
   const [newSkill, setNewSkill] = useState('');
 
@@ -41,6 +43,7 @@ const ProfileEditModal = ({ isOpen, onClose }: ProfileEditModalProps) => {
         skills: user.skills || [],
         is_freelancer: user.is_freelancer || false,
         hourly_rate: user.hourly_rate?.toString() || '',
+        avatar_url: user.avatar_url || '',
       });
     }
   }, [user, isOpen]);
@@ -50,6 +53,51 @@ const ProfileEditModal = ({ isOpen, onClose }: ProfileEditModalProps) => {
       ...prev,
       [field]: value
     }));
+  };
+
+  const handlePhotoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    try {
+      setUploading(true);
+      
+      if (!event.target.files || event.target.files.length === 0) {
+        return;
+      }
+
+      const file = event.target.files[0];
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${supabaseUser?.id}-${Math.random()}.${fileExt}`;
+      const filePath = `avatars/${fileName}`;
+
+      const { data, error } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, file);
+
+      if (error) {
+        throw error;
+      }
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(filePath);
+
+      setFormData(prev => ({
+        ...prev,
+        avatar_url: publicUrl
+      }));
+
+      toast({
+        title: "Photo uploaded successfully!",
+      });
+    } catch (error) {
+      console.error('Error uploading photo:', error);
+      toast({
+        title: "Error uploading photo",
+        description: "Please try again later.",
+        variant: "destructive",
+      });
+    } finally {
+      setUploading(false);
+    }
   };
 
   const addSkill = () => {
@@ -70,33 +118,53 @@ const ProfileEditModal = ({ isOpen, onClose }: ProfileEditModalProps) => {
   };
 
   const handleSave = async () => {
-    if (!supabaseUser) return;
+    if (!supabaseUser) {
+      toast({
+        title: "Authentication error",
+        description: "Please sign in again.",
+        variant: "destructive",
+      });
+      return;
+    }
 
     setLoading(true);
     try {
+      // Format full_name to include @ if it doesn't already
+      let formattedFullName = formData.full_name.trim();
+      if (formattedFullName && !formattedFullName.startsWith('@')) {
+        formattedFullName = `@${formattedFullName}`;
+      }
+
       const updateData = {
-        full_name: formData.full_name,
+        full_name: formattedFullName,
         bio: formData.bio || null,
         location: formData.location || null,
         website: formData.website || null,
         skills: formData.skills,
         is_freelancer: formData.is_freelancer,
         hourly_rate: formData.hourly_rate ? parseFloat(formData.hourly_rate) : null,
+        avatar_url: formData.avatar_url || null,
       };
+
+      console.log('Updating profile with data:', updateData);
 
       const { error } = await supabase
         .from('users')
         .update(updateData)
         .eq('id', supabaseUser.id);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Profile update error:', error);
+        throw error;
+      }
 
       toast({
         title: "Profile updated successfully!",
         description: "Your changes have been saved.",
       });
 
-      onClose();
+      // Force page reload to refresh user data
+      window.location.reload();
     } catch (error) {
       console.error('Error updating profile:', error);
       toast({
@@ -126,29 +194,48 @@ const ProfileEditModal = ({ isOpen, onClose }: ProfileEditModalProps) => {
           <div className="flex items-center space-x-4">
             <div className="w-20 h-20 rounded-full bg-gradient-to-r from-primary to-blue-500 p-1">
               <div className="w-full h-full rounded-full bg-card flex items-center justify-center">
-                {user?.avatar_url ? (
-                  <img src={user.avatar_url} alt="Profile" className="w-full h-full rounded-full object-cover" />
+                {formData.avatar_url ? (
+                  <img src={formData.avatar_url} alt="Profile" className="w-full h-full rounded-full object-cover" />
                 ) : (
                   <User className="w-8 h-8 text-primary" />
                 )}
               </div>
             </div>
-            <Button variant="outline" size="sm">
-              <Upload className="w-4 h-4 mr-2" />
-              Change Photo
-            </Button>
+            <div>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handlePhotoUpload}
+                className="hidden"
+                id="avatar-upload"
+              />
+              <Button 
+                variant="outline" 
+                size="sm" 
+                asChild
+                disabled={uploading}
+              >
+                <label htmlFor="avatar-upload" className="cursor-pointer">
+                  <Upload className="w-4 h-4 mr-2" />
+                  {uploading ? 'Uploading...' : 'Change Photo'}
+                </label>
+              </Button>
+            </div>
           </div>
 
           {/* Basic Info */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="full_name">Full Name</Label>
+              <Label htmlFor="full_name">Username</Label>
               <Input
                 id="full_name"
                 value={formData.full_name}
                 onChange={(e) => handleInputChange('full_name', e.target.value)}
-                placeholder="Enter your full name"
+                placeholder="Enter your username (e.g., mansur)"
               />
+              <p className="text-xs text-muted-foreground mt-1">
+                Will be displayed as @{formData.full_name.replace('@', '')}
+              </p>
             </div>
             <div>
               <Label htmlFor="location">Location</Label>
