@@ -236,7 +236,25 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_posts_with_users: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          id: string
+          user_id: string
+          content: string
+          image_url: string
+          video_url: string
+          tags: string[]
+          likes_count: number
+          comments_count: number
+          shares_count: number
+          created_at: string
+          updated_at: string
+          user_full_name: string
+          user_avatar_url: string
+          user_email: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never

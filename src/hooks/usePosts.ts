@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 
-interface Post {
+interface PostFromDB {
   id: string;
   user_id: string;
   content: string;
@@ -13,6 +13,23 @@ interface Post {
   likes_count?: number | null;
   comments_count?: number | null;
   shares_count?: number | null;
+  created_at: string;
+  updated_at: string;
+  user_full_name?: string | null;
+  user_avatar_url?: string | null;
+  user_email?: string | null;
+}
+
+interface Post {
+  id: string;
+  user_id: string;
+  content: string;
+  image_url?: string | null;
+  video_url?: string | null;
+  tags?: string[] | null;
+  likes_count: number;
+  comments_count: number;
+  shares_count: number;
   created_at: string;
   updated_at: string;
   user?: {
@@ -36,10 +53,31 @@ export function usePosts() {
     try {
       setError(null);
       const { data, error } = await supabase
-        .rpc('get_posts_with_users');
+        .rpc('get_posts_with_users') as { data: PostFromDB[] | null, error: any };
 
       if (error) throw error;
-      setPosts(data || []);
+      
+      // Transform the data to match our Post interface
+      const transformedPosts: Post[] = (data || []).map(post => ({
+        id: post.id,
+        user_id: post.user_id,
+        content: post.content,
+        image_url: post.image_url,
+        video_url: post.video_url,
+        tags: post.tags,
+        likes_count: post.likes_count || 0,
+        comments_count: post.comments_count || 0,
+        shares_count: post.shares_count || 0,
+        created_at: post.created_at,
+        updated_at: post.updated_at,
+        user: post.user_full_name ? {
+          full_name: post.user_full_name,
+          avatar_url: post.user_avatar_url,
+          email: post.user_email || ''
+        } : undefined
+      }));
+      
+      setPosts(transformedPosts);
     } catch (error) {
       console.error('Error fetching posts:', error);
       setError(error instanceof Error ? error.message : 'Failed to fetch posts');
@@ -57,20 +95,12 @@ export function usePosts() {
     if (!user) throw new Error('User not authenticated');
 
     try {
-      const { data, error } = await supabase
-        .from('posts')
-        .insert({
-          user_id: user.id,
-          content: postData.content,
-          image_url: postData.image_url || null,
-          video_url: postData.video_url || null,
-          tags: postData.tags || [],
-          likes_count: 0,
-          comments_count: 0,
-          shares_count: 0,
-        })
-        .select()
-        .single();
+      const { data, error } = await supabase.rpc('create_post', {
+        p_content: postData.content,
+        p_image_url: postData.image_url || null,
+        p_video_url: postData.video_url || null,
+        p_tags: postData.tags || []
+      });
 
       if (error) throw error;
       
