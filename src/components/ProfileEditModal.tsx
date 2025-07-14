@@ -67,8 +67,8 @@ const ProfileEditModal = ({ isOpen, onClose }: ProfileEditModalProps) => {
 
       const file = event.target.files[0];
       const fileExt = file.name.split('.').pop();
-      const fileName = `${supabaseUser?.id}-${Math.random()}.${fileExt}`;
-      const filePath = `avatars/${fileName}`;
+      const fileName = `${Math.random()}.${fileExt}`;
+      const filePath = `${supabaseUser?.id}/${fileName}`;
 
       const { data, error } = await supabase.storage
         .from('avatars')
