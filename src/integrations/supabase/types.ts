@@ -201,6 +201,7 @@ export type Database = {
           is_freelancer: boolean | null
           location: string | null
           skills: string[] | null
+          username: string | null
           website: string | null
         }
         Insert: {
@@ -214,6 +215,7 @@ export type Database = {
           is_freelancer?: boolean | null
           location?: string | null
           skills?: string[] | null
+          username?: string | null
           website?: string | null
         }
         Update: {
@@ -227,6 +229,7 @@ export type Database = {
           is_freelancer?: boolean | null
           location?: string | null
           skills?: string[] | null
+          username?: string | null
           website?: string | null
         }
         Relationships: []

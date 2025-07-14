@@ -23,6 +23,7 @@ const ProfileEditModal = ({ isOpen, onClose }: ProfileEditModalProps) => {
   const [uploading, setUploading] = useState(false);
   const [formData, setFormData] = useState({
     full_name: '',
+    username: '',
     bio: '',
     location: '',
     website: '',
@@ -37,6 +38,7 @@ const ProfileEditModal = ({ isOpen, onClose }: ProfileEditModalProps) => {
     if (user && isOpen) {
       setFormData({
         full_name: user.full_name || '',
+        username: (user as any).username || '',
         bio: user.bio || '',
         location: user.location || '',
         website: user.website || '',
@@ -129,14 +131,15 @@ const ProfileEditModal = ({ isOpen, onClose }: ProfileEditModalProps) => {
 
     setLoading(true);
     try {
-      // Format full_name to include @ if it doesn't already
-      let formattedFullName = formData.full_name.trim();
-      if (formattedFullName && !formattedFullName.startsWith('@')) {
-        formattedFullName = `@${formattedFullName}`;
+      // Format username to include @ if it doesn't already
+      let formattedUsername = formData.username.trim();
+      if (formattedUsername && !formattedUsername.startsWith('@')) {
+        formattedUsername = `@${formattedUsername}`;
       }
 
       const updateData = {
-        full_name: formattedFullName,
+        full_name: formData.full_name.trim() || null,
+        username: formattedUsername || null,
         bio: formData.bio || null,
         location: formData.location || null,
         website: formData.website || null,
@@ -226,26 +229,36 @@ const ProfileEditModal = ({ isOpen, onClose }: ProfileEditModalProps) => {
           {/* Basic Info */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="full_name">Username</Label>
+              <Label htmlFor="full_name">Full Name</Label>
               <Input
                 id="full_name"
                 value={formData.full_name}
                 onChange={(e) => handleInputChange('full_name', e.target.value)}
+                placeholder="Enter your full name"
+              />
+            </div>
+            <div>
+              <Label htmlFor="username">Username</Label>
+              <Input
+                id="username"
+                value={formData.username}
+                onChange={(e) => handleInputChange('username', e.target.value)}
                 placeholder="Enter your username (e.g., mansur)"
               />
               <p className="text-xs text-muted-foreground mt-1">
-                Will be displayed as @{formData.full_name.replace('@', '')}
+                Will be displayed as @{formData.username.replace('@', '')}
               </p>
             </div>
-            <div>
-              <Label htmlFor="location">Location</Label>
-              <Input
-                id="location"
-                value={formData.location}
-                onChange={(e) => handleInputChange('location', e.target.value)}
-                placeholder="City, Country"
-              />
-            </div>
+          </div>
+
+          <div>
+            <Label htmlFor="location">Location</Label>
+            <Input
+              id="location"
+              value={formData.location}
+              onChange={(e) => handleInputChange('location', e.target.value)}
+              placeholder="City, Country"
+            />
           </div>
 
           <div>
