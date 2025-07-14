@@ -236,6 +236,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      create_post: {
+        Args: {
+          p_content: string
+          p_image_url?: string
+          p_video_url?: string
+          p_tags?: string[]
+        }
+        Returns: string
+      }
       get_posts_with_users: {
         Args: Record<PropertyKey, never>
         Returns: {
