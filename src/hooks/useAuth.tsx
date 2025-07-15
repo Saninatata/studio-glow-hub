@@ -136,16 +136,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signIn = async (email: string, password: string) => {
     setLoading(true)
     
-    // Clean up any existing auth state first
-    cleanupAuthState()
-    
-    // Attempt global sign out to clear any existing sessions
-    try {
-      await supabase.auth.signOut({ scope: 'global' })
-    } catch (err) {
-      console.log('Pre-signin cleanup error (continuing):', err)
-    }
-    
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
