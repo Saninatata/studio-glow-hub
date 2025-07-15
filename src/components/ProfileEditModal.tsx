@@ -65,10 +65,14 @@ const ProfileEditModal = ({ isOpen, onClose }: ProfileEditModalProps) => {
         return;
       }
 
+      if (!supabaseUser) {
+        throw new Error('User not authenticated');
+      }
+
       const file = event.target.files[0];
       const fileExt = file.name.split('.').pop();
       const fileName = `${Math.random()}.${fileExt}`;
-      const filePath = `${supabaseUser?.id}/${fileName}`;
+      const filePath = `${supabaseUser.id}/${fileName}`;
 
       const { data, error } = await supabase.storage
         .from('avatars')
@@ -348,10 +352,10 @@ const ProfileEditModal = ({ isOpen, onClose }: ProfileEditModalProps) => {
             <Save className="w-4 h-4 mr-2" />
             {loading ? 'Saving...' : 'Save Changes'}
           </Button>
-          </div>
         </div>
       </div>
-    );
-  };
+    </div>
+  );
+};
 
 export default ProfileEditModal;

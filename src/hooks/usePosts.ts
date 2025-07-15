@@ -92,13 +92,11 @@ export function usePosts() {
     video_url?: string;
     tags?: string[];
   }) => {
-    if (!user) throw new Error('User not authenticated');
-    
-    // Check if user is actually signed in with Supabase auth
-    const { data: { user: authUser } } = await supabase.auth.getUser();
-    if (!authUser) throw new Error('Authentication required');
-
     try {
+      // Check if user is actually signed in with Supabase auth
+      const { data: { user: authUser } } = await supabase.auth.getUser();
+      if (!authUser) throw new Error('Authentication required');
+
       const { data, error } = await supabase.rpc('create_post', {
         p_content: postData.content,
         p_image_url: postData.image_url || null,
