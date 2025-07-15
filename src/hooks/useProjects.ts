@@ -50,12 +50,18 @@ export function useProjects() {
     description: string
     image_url: string
     tags: string[]
-    user_id: string
   }) => {
     try {
+      // Get current authenticated user
+      const { data: { user: authUser } } = await supabase.auth.getUser();
+      if (!authUser) throw new Error('Authentication required');
+
       const { data, error } = await supabase
         .from('projects')
-        .insert(projectData)
+        .insert({
+          ...projectData,
+          user_id: authUser.id
+        })
         .select()
         .single()
 

@@ -66,13 +66,18 @@ const ProfileEditModal = ({ isOpen, onClose }: ProfileEditModalProps) => {
       }
 
       if (!supabaseUser) {
-        throw new Error('User not authenticated');
+        // Check current auth state
+        const { data: { user: currentUser } } = await supabase.auth.getUser();
+        if (!currentUser) {
+          throw new Error('User not authenticated');
+        }
       }
 
       const file = event.target.files[0];
       const fileExt = file.name.split('.').pop();
       const fileName = `${Math.random()}.${fileExt}`;
-      const filePath = `${supabaseUser.id}/${fileName}`;
+      const currentUserId = supabaseUser?.id || (await supabase.auth.getUser()).data.user?.id;
+      const filePath = `${currentUserId}/${fileName}`;
 
       const { data, error } = await supabase.storage
         .from('avatars')

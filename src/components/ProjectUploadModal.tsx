@@ -39,8 +39,7 @@ const ProjectUploadModal: React.FC<ProjectUploadModalProps> = ({ isOpen, onClose
         title,
         description,
         image_url: imageUrl,
-        tags: tagArray,
-        user_id: user.id
+        tags: tagArray
       })
 
       toast({ title: 'Project uploaded successfully!' })
