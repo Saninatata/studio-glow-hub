@@ -38,7 +38,7 @@ const ProfileEditModal = ({ isOpen, onClose }: ProfileEditModalProps) => {
     if (user && isOpen) {
       setFormData({
         full_name: user.full_name || '',
-        username: (user as any).username || '',
+        username: (user as any).username?.replace('@', '') || '',
         bio: user.bio || '',
         location: user.location || '',
         website: user.website || '',
@@ -246,7 +246,7 @@ const ProfileEditModal = ({ isOpen, onClose }: ProfileEditModalProps) => {
                 placeholder="Enter your username (e.g., mansur)"
               />
               <p className="text-xs text-muted-foreground mt-1">
-                Will be displayed as @{formData.username.replace('@', '')}
+                Will be displayed as @{formData.username || 'username'}
               </p>
             </div>
           </div>
@@ -348,10 +348,10 @@ const ProfileEditModal = ({ isOpen, onClose }: ProfileEditModalProps) => {
             <Save className="w-4 h-4 mr-2" />
             {loading ? 'Saving...' : 'Save Changes'}
           </Button>
+          </div>
         </div>
       </div>
-    </div>
-  );
-};
+    );
+  };
 
 export default ProfileEditModal;

@@ -83,8 +83,8 @@ const Posts = () => {
             <CardHeader>
               <div className="flex items-start space-x-4">
                 <Avatar>
-                  <AvatarImage src={user.avatar_url} />
-                  <AvatarFallback>{user.full_name?.charAt(1) || 'U'}</AvatarFallback>
+                  <AvatarImage src={user.avatar_url || ''} />
+                  <AvatarFallback>{user.full_name?.charAt(0) || 'U'}</AvatarFallback>
                 </Avatar>
                 <div className="flex-1">
                   <Textarea
@@ -134,9 +134,9 @@ const Posts = () => {
                   <div className="flex items-start justify-between">
                     <div className="flex items-center space-x-3">
                       <Avatar>
-                        <AvatarImage src={post.user?.avatar_url} />
+                        <AvatarImage src={post.user?.avatar_url || ''} />
                         <AvatarFallback>
-                          {post.user?.full_name?.charAt(1) || 'U'}
+                          {post.user?.full_name?.charAt(0) || 'U'}
                         </AvatarFallback>
                       </Avatar>
                       <div>
@@ -175,17 +175,17 @@ const Posts = () => {
                     <div className="flex items-center space-x-6">
                       <Button variant="ghost" size="sm" className="hover:text-red-400">
                         <Heart className="w-4 h-4 mr-2" />
-                        {post.likes_count}
+                        {post.likes_count || 0}
                       </Button>
                       
                       <Button variant="ghost" size="sm" className="hover:text-blue-400">
                         <MessageCircle className="w-4 h-4 mr-2" />
-                        {post.comments_count}
+                        {post.comments_count || 0}
                       </Button>
                       
                       <Button variant="ghost" size="sm" className="hover:text-green-400">
                         <Share2 className="w-4 h-4 mr-2" />
-                        {post.shares_count}
+                        {post.shares_count || 0}
                       </Button>
                     </div>
                     
