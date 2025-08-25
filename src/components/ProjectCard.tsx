@@ -15,6 +15,10 @@ interface Project {
   views_count: number
   created_at: string
   updated_at: string
+  user?: {
+    full_name: string
+    avatar_url?: string | null
+  }
 }
 
 interface ProjectCardProps {
@@ -69,7 +73,9 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
               </div>
             </div>
             <div>
-              <h3 className="font-semibold text-foreground">Designer</h3>
+              <h3 className="font-semibold text-foreground">
+                {project.user?.full_name || 'Unknown User'}
+              </h3>
               <p className="text-sm text-muted-foreground">{formatDate(project.created_at)}</p>
             </div>
           </div>

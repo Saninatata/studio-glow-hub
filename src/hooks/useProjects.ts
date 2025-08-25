@@ -15,6 +15,10 @@ interface Project {
   views_count: number
   created_at: string
   updated_at: string
+  user?: {
+    full_name: string
+    avatar_url?: string | null
+  }
 }
 
 export function useProjects() {
@@ -32,7 +36,13 @@ export function useProjects() {
       setError(null)
       const { data, error } = await supabase
         .from('projects')
-        .select('*')
+        .select(`
+          *,
+          user:users!projects_user_id_fkey(
+            full_name,
+            avatar_url
+          )
+        `)
         .order('created_at', { ascending: false })
 
       if (error) throw error
