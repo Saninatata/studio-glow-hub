@@ -7,10 +7,10 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "12.2.3 (519615d)"
+    PostgrestVersion: "13.0.4"
   }
   public: {
     Tables: {
@@ -52,6 +52,51 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      jobs: {
+        Row: {
+          company: string
+          created_at: string
+          description: string
+          id: string
+          job_type: string | null
+          location: string | null
+          requirements: string | null
+          salary: string | null
+          tags: string[] | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          company: string
+          created_at?: string
+          description: string
+          id?: string
+          job_type?: string | null
+          location?: string | null
+          requirements?: string | null
+          salary?: string | null
+          tags?: string[] | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          company?: string
+          created_at?: string
+          description?: string
+          id?: string
+          job_type?: string | null
+          location?: string | null
+          requirements?: string | null
+          salary?: string | null
+          tags?: string[] | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       posts: {
         Row: {
@@ -189,6 +234,48 @@ export type Database = {
           },
         ]
       }
+      talents: {
+        Row: {
+          availability: string | null
+          created_at: string
+          description: string
+          experience: string | null
+          hourly_rate: string | null
+          id: string
+          location: string | null
+          skills: string[] | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          availability?: string | null
+          created_at?: string
+          description: string
+          experience?: string | null
+          hourly_rate?: string | null
+          id?: string
+          location?: string | null
+          skills?: string[] | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          availability?: string | null
+          created_at?: string
+          description?: string
+          experience?: string | null
+          hourly_rate?: string | null
+          id?: string
+          location?: string | null
+          skills?: string[] | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       users: {
         Row: {
           avatar_url: string | null
@@ -243,28 +330,28 @@ export type Database = {
         Args: {
           p_content: string
           p_image_url?: string
-          p_video_url?: string
           p_tags?: string[]
+          p_video_url?: string
         }
         Returns: string
       }
       get_posts_with_users: {
         Args: Record<PropertyKey, never>
         Returns: {
-          id: string
-          user_id: string
-          content: string
-          image_url: string
-          video_url: string
-          tags: string[]
-          likes_count: number
           comments_count: number
-          shares_count: number
+          content: string
           created_at: string
+          id: string
+          image_url: string
+          likes_count: number
+          shares_count: number
+          tags: string[]
           updated_at: string
-          user_full_name: string
           user_avatar_url: string
           user_email: string
+          user_full_name: string
+          user_id: string
+          video_url: string
         }[]
       }
     }

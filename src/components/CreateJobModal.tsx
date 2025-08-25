@@ -1,11 +1,13 @@
-
-import React, { useState } from 'react'
-import { X, Briefcase, MapPin, DollarSign, Clock } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
-import { useAuth } from '@/hooks/useAuth'
-import { toast } from '@/components/ui/use-toast'
+import React, { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
+import { X, MapPin, DollarSign, Briefcase, Plus } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
+import { useJobs } from '@/hooks/useJobs';
 
 interface CreateJobModalProps {
   isOpen: boolean
@@ -13,60 +15,86 @@ interface CreateJobModalProps {
 }
 
 const CreateJobModal: React.FC<CreateJobModalProps> = ({ isOpen, onClose }) => {
-  const [title, setTitle] = useState('')
-  const [company, setCompany] = useState('')
-  const [location, setLocation] = useState('')
-  const [salary, setSalary] = useState('')
-  const [jobType, setJobType] = useState('full-time')
-  const [description, setDescription] = useState('')
-  const [requirements, setRequirements] = useState('')
-  const [benefits, setBenefits] = useState('')
-  const [loading, setLoading] = useState(false)
-  const { user } = useAuth()
-
-  if (!isOpen) return null
+  const [title, setTitle] = useState('');
+  const [company, setCompany] = useState('');
+  const [location, setLocation] = useState('');
+  const [salary, setSalary] = useState('');
+  const [jobType, setJobType] = useState('');
+  const [description, setDescription] = useState('');
+  const [requirements, setRequirements] = useState('');
+  const [tags, setTags] = useState<string[]>([]);
+  const [newTag, setNewTag] = useState('');
+  const [loading, setLoading] = useState(false);
+  
+  const { toast } = useToast();
+  const { user } = useAuth();
+  const { createJob } = useJobs();
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
     if (!user) {
-      toast({ title: 'Please sign in to post jobs', variant: 'destructive' })
-      return
+      toast({
+        title: "Please sign in to post a job",
+        variant: "destructive",
+      });
+      return;
     }
 
-    if (!title.trim() || !company.trim() || !description.trim()) {
-      toast({ title: 'Please fill in all required fields', variant: 'destructive' })
-      return
-    }
-
-    setLoading(true)
+    setLoading(true);
     try {
-      // Here you would typically save to database
-      toast({ title: 'Job posted successfully!' })
-      onClose()
+      await createJob({
+        title,
+        company,
+        location: location || undefined,
+        salary: salary || undefined,
+        job_type: jobType || undefined,
+        description,
+        requirements: requirements || undefined,
+        tags,
+      });
+
+      toast({ title: 'Job posted successfully!' });
       
       // Reset form
-      setTitle('')
-      setCompany('')
-      setLocation('')
-      setSalary('')
-      setJobType('full-time')
-      setDescription('')
-      setRequirements('')
-      setBenefits('')
-    } catch (error: any) {
+      setTitle('');
+      setCompany('');
+      setLocation('');
+      setSalary('');
+      setJobType('');
+      setDescription('');
+      setRequirements('');
+      setTags([]);
+      setNewTag('');
+      
+      onClose();
+    } catch (error) {
+      console.error('Error creating job:', error);
       toast({
-        title: 'Failed to post job',
-        description: error.message,
-        variant: 'destructive',
-      })
+        title: "Error posting job",
+        description: "Please try again later.",
+        variant: "destructive",
+      });
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
+
+  const addTag = () => {
+    if (newTag.trim() && !tags.includes(newTag.trim())) {
+      setTags([...tags, newTag.trim()]);
+      setNewTag('');
+    }
+  };
+
+  const removeTag = (tagToRemove: string) => {
+    setTags(tags.filter(tag => tag !== tagToRemove));
+  };
+
+  if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-      <div className="glass rounded-xl p-8 w-full max-w-3xl mx-4 max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-card/95 backdrop-blur-md rounded-xl border border-white/20 max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-bold gradient-text">Post a Job</h2>
           <Button variant="ghost" size="icon" onClick={onClose}>
@@ -118,7 +146,7 @@ const CreateJobModal: React.FC<CreateJobModalProps> = ({ isOpen, onClose }) => {
                 <Input
                   value={salary}
                   onChange={(e) => setSalary(e.target.value)}
-                  placeholder="$80k - $120k"
+                  placeholder="$80,000 - $120,000"
                   className="pl-12"
                 />
               </div>
@@ -126,20 +154,21 @@ const CreateJobModal: React.FC<CreateJobModalProps> = ({ isOpen, onClose }) => {
 
             <div>
               <label className="block text-sm font-medium mb-2">Job Type</label>
-              <div className="relative">
-                <Clock className="absolute left-3 top-3 w-5 h-5 text-muted-foreground" />
-                <select
-                  value={jobType}
-                  onChange={(e) => setJobType(e.target.value)}
-                  className="w-full pl-12 pr-4 py-2 border border-input bg-background rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
-                >
-                  <option value="full-time">Full-time</option>
-                  <option value="part-time">Part-time</option>
-                  <option value="contract">Contract</option>
-                  <option value="freelance">Freelance</option>
-                  <option value="internship">Internship</option>
-                </select>
-              </div>
+              <Select value={jobType} onValueChange={setJobType}>
+                <SelectTrigger>
+                  <div className="flex items-center">
+                    <Briefcase className="w-4 h-4 mr-2 text-muted-foreground" />
+                    <SelectValue placeholder="Select job type" />
+                  </div>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="full-time">Full-time</SelectItem>
+                  <SelectItem value="part-time">Part-time</SelectItem>
+                  <SelectItem value="contract">Contract</SelectItem>
+                  <SelectItem value="freelance">Freelance</SelectItem>
+                  <SelectItem value="internship">Internship</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
@@ -148,8 +177,8 @@ const CreateJobModal: React.FC<CreateJobModalProps> = ({ isOpen, onClose }) => {
             <Textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Describe the role, responsibilities, and what you're looking for..."
-              rows={4}
+              placeholder="Describe the role, responsibilities, and what makes this opportunity exciting..."
+              className="min-h-[120px]"
               required
             />
           </div>
@@ -160,41 +189,64 @@ const CreateJobModal: React.FC<CreateJobModalProps> = ({ isOpen, onClose }) => {
               value={requirements}
               onChange={(e) => setRequirements(e.target.value)}
               placeholder="List the required skills, experience, and qualifications..."
-              rows={3}
+              className="min-h-[100px]"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2">Benefits & Perks</label>
-            <Textarea
-              value={benefits}
-              onChange={(e) => setBenefits(e.target.value)}
-              placeholder="Health insurance, remote work, flexible hours, etc..."
-              rows={3}
-            />
+            <label className="block text-sm font-medium mb-2">Tags</label>
+            <div className="flex flex-wrap gap-2 mb-3">
+              {tags.map((tag, index) => (
+                <Badge 
+                  key={index} 
+                  variant="secondary" 
+                  className="flex items-center gap-1 px-3 py-1"
+                >
+                  {tag}
+                  <button
+                    type="button"
+                    onClick={() => removeTag(tag)}
+                    className="ml-1 hover:text-destructive"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </Badge>
+              ))}
+            </div>
+            <div className="flex gap-2">
+              <Input
+                value={newTag}
+                onChange={(e) => setNewTag(e.target.value)}
+                placeholder="Add a tag (e.g., React, Design, Remote)"
+                onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())}
+              />
+              <Button type="button" onClick={addTag} variant="outline" size="icon">
+                <Plus className="w-4 h-4" />
+              </Button>
+            </div>
           </div>
 
-          <div className="flex justify-end space-x-3 pt-4">
-            <Button type="button" variant="outline" onClick={onClose}>
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              className="glow-primary"
+          <div className="flex justify-end gap-3 pt-6">
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={onClose}
               disabled={loading}
             >
-              {loading ? 'Posting...' : (
-                <>
-                  <Briefcase className="w-4 h-4 mr-2" />
-                  Post Job
-                </>
-              )}
+              Cancel
+            </Button>
+            <Button 
+              type="submit" 
+              className="bg-primary hover:bg-primary/90"
+              disabled={loading}
+            >
+              {loading ? 'Posting...' : 'Post Job'}
             </Button>
           </div>
         </form>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default CreateJobModal
+export default CreateJobModal;

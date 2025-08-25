@@ -1,12 +1,13 @@
-
 import React, { useState } from 'react';
-import { X, Upload, DollarSign, MapPin, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
+import { X, Plus, User, MapPin, Clock, DollarSign } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
+import { useTalents } from '@/hooks/useTalents';
 
 interface CreateTalentModalProps {
   isOpen: boolean;
@@ -25,7 +26,10 @@ const CreateTalentModal = ({ isOpen, onClose }: CreateTalentModalProps) => {
   });
   const [newSkill, setNewSkill] = useState('');
   const [loading, setLoading] = useState(false);
+
   const { toast } = useToast();
+  const { user } = useAuth();
+  const { createTalent } = useTalents();
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({
@@ -53,18 +57,28 @@ const CreateTalentModal = ({ isOpen, onClose }: CreateTalentModalProps) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-
-    try {
-      // Here you would typically save to database
-      console.log('Talent offer data:', formData);
-      
+    if (!user) {
       toast({
-        title: "Talent offer created successfully!",
-        description: "Your talent profile is now visible to potential clients.",
+        title: "Please sign in to offer your talent",
+        variant: "destructive",
       });
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await createTalent({
+        title: formData.title,
+        description: formData.description,
+        skills: formData.skills,
+        hourly_rate: formData.hourlyRate || undefined,
+        availability: formData.availability || undefined,
+        location: formData.location || undefined,
+        experience: formData.experience || undefined,
+      });
+
+      toast({ title: 'Talent offer created successfully!' });
       
-      onClose();
       // Reset form
       setFormData({
         title: '',
@@ -75,7 +89,11 @@ const CreateTalentModal = ({ isOpen, onClose }: CreateTalentModalProps) => {
         location: '',
         experience: ''
       });
+      setNewSkill('');
+      
+      onClose();
     } catch (error) {
+      console.error('Error creating talent offer:', error);
       toast({
         title: "Error creating talent offer",
         description: "Please try again later.",
@@ -124,15 +142,21 @@ const CreateTalentModal = ({ isOpen, onClose }: CreateTalentModalProps) => {
 
           <div>
             <Label>Skills</Label>
-            <div className="flex flex-wrap gap-2 mb-2">
-              {formData.skills.map((skill) => (
-                <Badge
-                  key={skill}
-                  variant="secondary"
-                  className="bg-primary/20 text-primary hover:bg-primary/30 cursor-pointer"
-                  onClick={() => removeSkill(skill)}
+            <div className="flex flex-wrap gap-2 mb-3">
+              {formData.skills.map((skill, index) => (
+                <Badge 
+                  key={index} 
+                  variant="secondary" 
+                  className="flex items-center gap-1"
                 >
-                  {skill} ×
+                  {skill}
+                  <button
+                    type="button"
+                    onClick={() => removeSkill(skill)}
+                    className="ml-1 hover:text-destructive"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
                 </Badge>
               ))}
             </div>
@@ -140,49 +164,30 @@ const CreateTalentModal = ({ isOpen, onClose }: CreateTalentModalProps) => {
               <Input
                 value={newSkill}
                 onChange={(e) => setNewSkill(e.target.value)}
-                placeholder="Add a skill"
+                placeholder="Add a skill (e.g., React, Figma, Photoshop)"
                 onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addSkill())}
               />
-              <Button type="button" onClick={addSkill} variant="outline">
-                Add
+              <Button type="button" onClick={addSkill} variant="outline" size="icon">
+                <Plus className="w-4 h-4" />
               </Button>
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="hourlyRate">Hourly Rate (USD)</Label>
+              <Label htmlFor="hourlyRate">Hourly Rate</Label>
               <div className="relative">
                 <DollarSign className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
                 <Input
                   id="hourlyRate"
-                  type="number"
                   value={formData.hourlyRate}
                   onChange={(e) => handleInputChange('hourlyRate', e.target.value)}
-                  placeholder="50"
+                  placeholder="50/hour"
                   className="pl-10"
-                  required
                 />
               </div>
             </div>
 
-            <div>
-              <Label htmlFor="location">Location</Label>
-              <div className="relative">
-                <MapPin className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
-                <Input
-                  id="location"
-                  value={formData.location}
-                  onChange={(e) => handleInputChange('location', e.target.value)}
-                  placeholder="Remote / City, Country"
-                  className="pl-10"
-                  required
-                />
-              </div>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <Label htmlFor="availability">Availability</Label>
               <div className="relative">
@@ -191,32 +196,55 @@ const CreateTalentModal = ({ isOpen, onClose }: CreateTalentModalProps) => {
                   id="availability"
                   value={formData.availability}
                   onChange={(e) => handleInputChange('availability', e.target.value)}
-                  placeholder="Full-time / Part-time / Contract"
+                  placeholder="Full-time, Part-time, Weekends"
                   className="pl-10"
-                  required
                 />
               </div>
             </div>
+          </div>
 
-            <div>
-              <Label htmlFor="experience">Years of Experience</Label>
+          <div>
+            <Label htmlFor="location">Location</Label>
+            <div className="relative">
+              <MapPin className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
               <Input
-                id="experience"
-                type="number"
-                value={formData.experience}
-                onChange={(e) => handleInputChange('experience', e.target.value)}
-                placeholder="3"
-                required
+                id="location"
+                value={formData.location}
+                onChange={(e) => handleInputChange('location', e.target.value)}
+                placeholder="Remote, New York, or Worldwide"
+                className="pl-10"
               />
             </div>
           </div>
 
-          <div className="flex justify-end gap-3 pt-4 border-t">
-            <Button type="button" variant="outline" onClick={onClose}>
+          <div>
+            <Label htmlFor="experience">Experience Level</Label>
+            <div className="relative">
+              <User className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
+              <Input
+                id="experience"
+                value={formData.experience}
+                onChange={(e) => handleInputChange('experience', e.target.value)}
+                placeholder="e.g., 5+ years, Senior level, Junior"
+                className="pl-10"
+              />
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-3 pt-4">
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={onClose}
+              disabled={loading}
+            >
               Cancel
             </Button>
-            <Button type="submit" disabled={loading}>
-              {loading ? 'Publishing...' : 'Publish Talent Offer'}
+            <Button 
+              type="submit"
+              disabled={loading}
+            >
+              {loading ? 'Creating...' : 'Create Talent Offer'}
             </Button>
           </div>
         </form>

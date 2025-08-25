@@ -131,15 +131,14 @@ const Header = () => {
                   
                   {!user && !loading && (
                     <div className="border-t border-border mt-4 pt-4">
-                      <Button
-                        onClick={() => {
-                          setMobileMenuOpen(false);
-                          setShowAuthModal(true);
-                        }}
-                        className="w-full glow-hover bg-primary hover:bg-primary/90"
-                      >
-                        Join StudioLink
-                      </Button>
+                      <Link to="/auth">
+                        <Button 
+                          className="w-full glow-hover bg-primary hover:bg-primary/90"
+                          onClick={() => setMobileMenuOpen(false)}
+                        >
+                          Join StudioLink
+                        </Button>
+                      </Link>
                     </div>
                   )}
                 </div>
@@ -180,25 +179,25 @@ const Header = () => {
             ) : loading ? (
               <div className="w-20 h-9 bg-secondary/50 rounded animate-pulse"></div>
             ) : (
-              <Button 
-                onClick={() => setShowAuthModal(true)}
-                className="glow-hover bg-primary hover:bg-primary/90"
-              >
-                Join StudioLink
-              </Button>
+              <Link to="/auth">
+                <Button className="glow-hover bg-primary hover:bg-primary/90">
+                  Join StudioLink
+                </Button>
+              </Link>
             )}
           </div>
 
           {/* Mobile Auth Button (when not authenticated) */}
           {!user && !loading && (
             <div className="md:hidden">
-              <Button 
-                onClick={() => setShowAuthModal(true)}
-                className="glow-hover bg-primary hover:bg-primary/90"
-                size="sm"
-              >
-                Join
-              </Button>
+              <Link to="/auth">
+                <Button 
+                  className="glow-hover bg-primary hover:bg-primary/90"
+                  size="sm"
+                >
+                  Join
+                </Button>
+              </Link>
             </div>
           )}
         </div>
