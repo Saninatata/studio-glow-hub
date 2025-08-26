@@ -48,6 +48,13 @@ export type Database = {
             foreignKeyName: "comments_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
+            referencedRelation: "user_public_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "comments_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
           },
@@ -143,6 +150,13 @@ export type Database = {
             foreignKeyName: "posts_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
+            referencedRelation: "user_public_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "posts_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
           },
@@ -173,6 +187,13 @@ export type Database = {
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_likes_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_public_profiles"
             referencedColumns: ["id"]
           },
           {
@@ -225,6 +246,13 @@ export type Database = {
           views_count?: number | null
         }
         Relationships: [
+          {
+            foreignKeyName: "projects_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_public_profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "projects_user_id_fkey"
             columns: ["user_id"]
@@ -323,7 +351,27 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      user_public_profiles: {
+        Row: {
+          avatar_url: string | null
+          full_name: string | null
+          id: string | null
+          username: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          full_name?: string | null
+          id?: string | null
+          username?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          full_name?: string | null
+          id?: string | null
+          username?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       create_post: {
@@ -348,10 +396,27 @@ export type Database = {
           tags: string[]
           updated_at: string
           user_avatar_url: string
-          user_email: string
           user_full_name: string
           user_id: string
           video_url: string
+        }[]
+      }
+      get_projects_with_users: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          comments_count: number
+          created_at: string
+          description: string
+          id: string
+          image_url: string
+          likes_count: number
+          tags: string[]
+          title: string
+          updated_at: string
+          user_avatar_url: string
+          user_full_name: string
+          user_id: string
+          views_count: number
         }[]
       }
     }
