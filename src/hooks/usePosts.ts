@@ -17,7 +17,7 @@ interface PostFromDB {
   updated_at: string;
   user_full_name?: string | null;
   user_avatar_url?: string | null;
-  user_email?: string | null;
+  
 }
 
 interface Post {
@@ -35,7 +35,6 @@ interface Post {
   user?: {
     full_name: string;
     avatar_url?: string | null;
-    email: string;
   };
 }
 
@@ -72,8 +71,7 @@ export function usePosts() {
         updated_at: post.updated_at,
         user: post.user_full_name ? {
           full_name: post.user_full_name,
-          avatar_url: post.user_avatar_url,
-          email: post.user_email || ''
+          avatar_url: post.user_avatar_url
         } : undefined
       }));
       

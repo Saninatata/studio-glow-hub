@@ -15,6 +15,8 @@ interface Project {
   views_count: number
   created_at: string
   updated_at: string
+  user_full_name?: string
+  user_avatar_url?: string
   user?: {
     full_name: string
     avatar_url?: string | null
@@ -35,18 +37,20 @@ export function useProjects() {
     try {
       setError(null)
       const { data, error } = await supabase
-        .from('projects')
-        .select(`
-          *,
-          user:users!projects_user_id_fkey(
-            full_name,
-            avatar_url
-          )
-        `)
-        .order('created_at', { ascending: false })
+        .rpc('get_projects_with_users')
 
       if (error) throw error
-      setProjects(data || [])
+      
+      // Transform data to include user object
+      const transformedProjects = (data || []).map(project => ({
+        ...project,
+        user: project.user_full_name ? {
+          full_name: project.user_full_name,
+          avatar_url: project.user_avatar_url
+        } : undefined
+      }))
+      
+      setProjects(transformedProjects)
     } catch (error) {
       console.error('Error fetching projects:', error)
       setError(error instanceof Error ? error.message : 'Failed to fetch projects')
