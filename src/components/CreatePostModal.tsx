@@ -1,11 +1,13 @@
 
 import React, { useState } from 'react'
-import { X, Image as ImageIcon, Video, Type, Hash } from 'lucide-react'
+import { X, Image as ImageIcon, Video, Type, Hash, Upload } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { useAuth } from '@/hooks/useAuth'
+import { usePosts } from '@/hooks/usePosts'
 import { toast } from '@/components/ui/use-toast'
+import { supabase } from '@/integrations/supabase/client'
 
 interface CreatePostModalProps {
   isOpen: boolean
@@ -14,13 +16,53 @@ interface CreatePostModalProps {
 
 const CreatePostModal: React.FC<CreatePostModalProps> = ({ isOpen, onClose }) => {
   const [content, setContent] = useState('')
-  const [imageUrl, setImageUrl] = useState('')
-  const [videoUrl, setVideoUrl] = useState('')
+  const [imageFile, setImageFile] = useState<File | null>(null)
+  const [videoFile, setVideoFile] = useState<File | null>(null)
+  const [imagePreview, setImagePreview] = useState<string | null>(null)
+  const [videoPreview, setVideoPreview] = useState<string | null>(null)
   const [tags, setTags] = useState('')
   const [loading, setLoading] = useState(false)
   const { user } = useAuth()
+  const { createPost } = usePosts()
 
   if (!isOpen) return null
+
+  const uploadFile = async (file: File, bucket: string, folder: string): Promise<string | null> => {
+    const fileExt = file.name.split('.').pop()
+    const fileName = `${folder}/${user?.id}/${Date.now()}.${fileExt}`
+    
+    const { data, error } = await supabase.storage
+      .from(bucket)
+      .upload(fileName, file)
+
+    if (error) {
+      console.error('Upload error:', error)
+      return null
+    }
+
+    const { data: { publicUrl } } = supabase.storage
+      .from(bucket)
+      .getPublicUrl(data.path)
+
+    return publicUrl
+  }
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, type: 'image' | 'video') => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    if (type === 'image') {
+      setImageFile(file)
+      const reader = new FileReader()
+      reader.onload = (e) => setImagePreview(e.target?.result as string)
+      reader.readAsDataURL(file)
+    } else {
+      setVideoFile(file)
+      const reader = new FileReader()
+      reader.onload = (e) => setVideoPreview(e.target?.result as string)
+      reader.readAsDataURL(file)
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -36,15 +78,48 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ isOpen, onClose }) =>
 
     setLoading(true)
     try {
-      // Here you would typically save to database
-      // For now, just show success message
+      let imageUrl: string | undefined
+      let videoUrl: string | undefined
+
+      // Upload image if selected
+      if (imageFile) {
+        const uploadedImageUrl = await uploadFile(imageFile, 'post-images', 'images')
+        if (uploadedImageUrl) {
+          imageUrl = uploadedImageUrl
+        } else {
+          throw new Error('Failed to upload image')
+        }
+      }
+
+      // Upload video if selected
+      if (videoFile) {
+        const uploadedVideoUrl = await uploadFile(videoFile, 'post-images', 'videos')
+        if (uploadedVideoUrl) {
+          videoUrl = uploadedVideoUrl
+        } else {
+          throw new Error('Failed to upload video')
+        }
+      }
+
+      // Create post with uploaded file URLs
+      const tagsArray = tags.trim() ? tags.split(',').map(tag => tag.trim()) : []
+      
+      await createPost({
+        content: content.trim(),
+        image_url: imageUrl,
+        video_url: videoUrl,
+        tags: tagsArray
+      })
+
       toast({ title: 'Post created successfully!' })
       onClose()
       
       // Reset form
       setContent('')
-      setImageUrl('')
-      setVideoUrl('')
+      setImageFile(null)
+      setVideoFile(null)
+      setImagePreview(null)
+      setVideoPreview(null)
       setTags('')
     } catch (error: any) {
       toast({
@@ -82,28 +157,46 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ isOpen, onClose }) =>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium mb-2">Add Image</label>
+              <label className="block text-sm font-medium mb-2">Upload Image</label>
               <div className="relative">
-                <ImageIcon className="absolute left-3 top-3 w-5 h-5 text-muted-foreground" />
-                <Input
-                  value={imageUrl}
-                  onChange={(e) => setImageUrl(e.target.value)}
-                  placeholder="https://example.com/image.jpg"
-                  className="pl-12"
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => handleFileChange(e, 'image')}
+                  className="hidden"
+                  id="image-upload"
                 />
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => document.getElementById('image-upload')?.click()}
+                >
+                  <Upload className="w-4 h-4 mr-2" />
+                  {imageFile ? imageFile.name : 'Choose Image'}
+                </Button>
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-2">Add Video</label>
+              <label className="block text-sm font-medium mb-2">Upload Video</label>
               <div className="relative">
-                <Video className="absolute left-3 top-3 w-5 h-5 text-muted-foreground" />
-                <Input
-                  value={videoUrl}
-                  onChange={(e) => setVideoUrl(e.target.value)}
-                  placeholder="https://example.com/video.mp4"
-                  className="pl-12"
+                <input
+                  type="file"
+                  accept="video/*"
+                  onChange={(e) => handleFileChange(e, 'video')}
+                  className="hidden"
+                  id="video-upload"
                 />
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => document.getElementById('video-upload')?.click()}
+                >
+                  <Upload className="w-4 h-4 mr-2" />
+                  {videoFile ? videoFile.name : 'Choose Video'}
+                </Button>
               </div>
             </div>
           </div>
@@ -121,28 +214,50 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ isOpen, onClose }) =>
             </div>
           </div>
 
-          {(imageUrl || videoUrl) && (
+          {(imagePreview || videoPreview) && (
             <div className="p-4 border rounded-lg bg-muted/20">
               <p className="text-sm text-muted-foreground mb-2">Preview:</p>
-              {imageUrl && (
-                <img
-                  src={imageUrl}
-                  alt="Preview"
-                  className="w-full h-48 object-cover rounded-lg mb-2"
-                  onError={(e) => {
-                    e.currentTarget.style.display = 'none'
-                  }}
-                />
+              {imagePreview && (
+                <div className="relative">
+                  <img
+                    src={imagePreview}
+                    alt="Preview"
+                    className="w-full h-48 object-cover rounded-lg mb-2"
+                  />
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    size="sm"
+                    className="absolute top-2 right-2"
+                    onClick={() => {
+                      setImageFile(null)
+                      setImagePreview(null)
+                    }}
+                  >
+                    <X className="w-4 h-4" />
+                  </Button>
+                </div>
               )}
-              {videoUrl && (
-                <video
-                  src={videoUrl}
-                  className="w-full h-48 object-cover rounded-lg"
-                  controls
-                  onError={(e) => {
-                    e.currentTarget.style.display = 'none'
-                  }}
-                />
+              {videoPreview && (
+                <div className="relative">
+                  <video
+                    src={videoPreview}
+                    className="w-full h-48 object-cover rounded-lg"
+                    controls
+                  />
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    size="sm"
+                    className="absolute top-2 right-2"
+                    onClick={() => {
+                      setVideoFile(null)
+                      setVideoPreview(null)
+                    }}
+                  >
+                    <X className="w-4 h-4" />
+                  </Button>
+                </div>
               )}
             </div>
           )}
