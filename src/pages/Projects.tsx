@@ -16,7 +16,7 @@ const Projects = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [showUploadModal, setShowUploadModal] = useState(false);
-  const { projects, loading, error } = useProjects();
+  const { projects, loading, error, deleteProject } = useProjects();
   const { user } = useAuth();
 
   const categories = ['all', 'ui-design', 'web-design', 'mobile-design', 'branding', 'illustration', 'photography'];
@@ -152,7 +152,7 @@ const Projects = () => {
               }>
                 {filteredProjects.map((project, index) => (
                   <div key={project.id} style={{ animationDelay: `${index * 0.1}s` }}>
-                    <ProjectCard project={project} />
+                     <ProjectCard project={project} onDelete={deleteProject} />
                   </div>
                 ))}
               </div>
@@ -190,7 +190,7 @@ const Projects = () => {
                 }>
                   {myProjects.map((project, index) => (
                     <div key={project.id} style={{ animationDelay: `${index * 0.1}s` }}>
-                      <ProjectCard project={project} />
+                      <ProjectCard project={project} onDelete={deleteProject} />
                     </div>
                   ))}
                 </div>

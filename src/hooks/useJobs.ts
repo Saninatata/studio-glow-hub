@@ -85,11 +85,29 @@ export function useJobs() {
     }
   }
 
+  const deleteJob = async (jobId: string) => {
+    try {
+      const { error } = await supabase
+        .from('jobs')
+        .delete()
+        .eq('id', jobId)
+
+      if (error) throw error
+      
+      // Refresh jobs list
+      await fetchJobs()
+    } catch (error) {
+      console.error('Error deleting job:', error)
+      throw error
+    }
+  }
+
   return {
     jobs,
     loading,
     error,
     createJob,
+    deleteJob,
     refetch: fetchJobs,
   }
 }

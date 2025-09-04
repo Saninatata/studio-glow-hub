@@ -83,11 +83,29 @@ export function useTalents() {
     }
   }
 
+  const deleteTalent = async (talentId: string) => {
+    try {
+      const { error } = await supabase
+        .from('talents')
+        .delete()
+        .eq('id', talentId)
+
+      if (error) throw error
+      
+      // Refresh talents list
+      await fetchTalents()
+    } catch (error) {
+      console.error('Error deleting talent:', error)
+      throw error
+    }
+  }
+
   return {
     talents,
     loading,
     error,
     createTalent,
+    deleteTalent,
     refetch: fetchTalents,
   }
 }

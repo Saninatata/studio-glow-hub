@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Heart, MessageCircle, Share2, Bookmark, MoreHorizontal, Plus } from 'lucide-react';
+import { Heart, MessageCircle, Share2, Bookmark, MoreHorizontal, Plus, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -15,7 +15,7 @@ import { useToast } from '@/hooks/use-toast';
 const Posts = () => {
   const [newPost, setNewPost] = useState('');
   const { user } = useAuth();
-  const { posts, loading, createPost } = usePosts();
+  const { posts, loading, createPost, deletePost } = usePosts();
   const { toast } = useToast();
   const [posting, setPosting] = useState(false);
 
@@ -48,6 +48,21 @@ const Posts = () => {
       });
     } finally {
       setPosting(false);
+    }
+  };
+
+  const handleDeletePost = async (postId: string) => {
+    try {
+      await deletePost(postId);
+      toast({
+        title: "Post deleted successfully",
+      });
+    } catch (error) {
+      toast({
+        title: "Error deleting post",
+        description: "Please try again later.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -150,9 +165,16 @@ const Posts = () => {
                         </p>
                       </div>
                     </div>
-                    <Button variant="ghost" size="icon">
-                      <MoreHorizontal className="w-4 h-4" />
-                    </Button>
+                    {user && user.id === post.user_id && (
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        onClick={() => handleDeletePost(post.id)}
+                        className="hover:text-red-500 text-muted-foreground"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    )}
                   </div>
                 </CardHeader>
                 

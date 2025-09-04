@@ -1,7 +1,9 @@
 
 import React from 'react';
-import { Heart, MessageCircle, Share2, Eye, User } from 'lucide-react';
+import { Heart, MessageCircle, Share2, Eye, User, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useAuth } from '@/hooks/useAuth';
+import { useToast } from '@/hooks/use-toast';
 
 interface Project {
   id: string
@@ -23,9 +25,30 @@ interface Project {
 
 interface ProjectCardProps {
   project: Project;
+  onDelete?: (projectId: string) => Promise<void>;
 }
 
-const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
+const ProjectCard: React.FC<ProjectCardProps> = ({ project, onDelete }) => {
+  const { user } = useAuth();
+  const { toast } = useToast();
+
+  const handleDelete = async () => {
+    if (!onDelete) return;
+    
+    try {
+      await onDelete(project.id);
+      toast({
+        title: "Project deleted successfully",
+      });
+    } catch (error) {
+      toast({
+        title: "Error deleting project",
+        description: "Please try again later.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     const now = new Date();
@@ -66,18 +89,30 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
       <div className="p-6">
         {/* Header */}
         <div className="flex items-start justify-between mb-4">
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-r from-primary to-blue-500 p-0.5">
-              <div className="w-full h-full rounded-full bg-card flex items-center justify-center">
-                <User className="w-5 h-5 text-primary" />
+          <div className="flex items-center justify-between w-full">
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-r from-primary to-blue-500 p-0.5">
+                <div className="w-full h-full rounded-full bg-card flex items-center justify-center">
+                  <User className="w-5 h-5 text-primary" />
+                </div>
+              </div>
+              <div>
+                <h3 className="font-semibold text-foreground">
+                  {project.user?.full_name || 'Unknown User'}
+                </h3>
+                <p className="text-sm text-muted-foreground">{formatDate(project.created_at)}</p>
               </div>
             </div>
-            <div>
-              <h3 className="font-semibold text-foreground">
-                {project.user?.full_name || 'Unknown User'}
-              </h3>
-              <p className="text-sm text-muted-foreground">{formatDate(project.created_at)}</p>
-            </div>
+            {user && user.id === project.user_id && (
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={handleDelete}
+                className="hover:text-red-500 text-muted-foreground"
+              >
+                <Trash2 className="w-4 h-4" />
+              </Button>
+            )}
           </div>
         </div>
 

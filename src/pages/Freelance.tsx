@@ -8,18 +8,24 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Header from '@/components/Header';
+import TalentCard from '@/components/TalentCard';
+import JobCard from '@/components/JobCard';
 import { useAuth } from '@/hooks/useAuth';
+import { useJobs } from '@/hooks/useJobs';
+import { useTalents } from '@/hooks/useTalents';
 
 const Freelance = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedBudget, setSelectedBudget] = useState('all');
   const { user } = useAuth();
+  const { jobs: dbJobs, loading: jobsLoading, deleteJob } = useJobs();
+  const { talents, loading: talentsLoading, deleteTalent } = useTalents();
 
   const categories = ['all', 'ui-design', 'web-development', 'mobile-design', 'branding', 'illustration', 'photography'];
   const budgetRanges = ['all', '0-500', '500-1000', '1000-5000', '5000+'];
 
-  const jobs = [
+  const demoJobs = [
     {
       id: 1,
       title: 'Modern E-commerce Website Design',
@@ -190,122 +196,39 @@ const Freelance = () => {
 
           <TabsContent value="jobs">
             <div className="space-y-6">
-              {jobs.map((job) => (
-                <Card key={job.id} className="glass border-white/10 project-card">
-                  <CardHeader>
-                    <div className="flex justify-between items-start">
-                      <div className="flex-1">
-                        <CardTitle className="text-xl mb-2 hover:text-primary transition-colors cursor-pointer">
-                          {job.title}
-                        </CardTitle>
-                        <p className="text-muted-foreground mb-4">{job.description}</p>
-                        
-                        <div className="flex flex-wrap gap-2 mb-4">
-                          {job.skills.map((skill) => (
-                            <Badge key={skill} variant="secondary" className="bg-primary/20 text-primary">
-                              {skill}
-                            </Badge>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  
-                  <CardContent>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                      <div className="flex items-center text-sm">
-                        <DollarSign className="w-4 h-4 mr-2 text-green-500" />
-                        <span className="font-semibold">{job.budget}</span>
-                      </div>
-                      <div className="flex items-center text-sm">
-                        <Clock className="w-4 h-4 mr-2 text-blue-500" />
-                        <span>{job.timeline}</span>
-                      </div>
-                      <div className="flex items-center text-sm">
-                        <MapPin className="w-4 h-4 mr-2 text-purple-500" />
-                        <span>{job.location}</span>
-                      </div>
-                      <div className="flex items-center text-sm">
-                        <Star className="w-4 h-4 mr-2 text-yellow-500" />
-                        <span>{job.rating} ({job.proposals} proposals)</span>
-                      </div>
-                    </div>
-                    
-                    <div className="flex justify-between items-center">
-                      <div className="text-sm text-muted-foreground">
-                        Posted by <span className="font-medium">{job.client}</span> • {job.postedTime}
-                      </div>
-                      <Button className="glow-hover bg-primary hover:bg-primary/90">
-                        Apply Now
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+              {jobsLoading ? (
+                <div className="text-center py-12">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+                  <p className="mt-4 text-muted-foreground">Loading jobs...</p>
+                </div>
+              ) : dbJobs.length === 0 ? (
+                <div className="text-center py-12">
+                  <p className="text-muted-foreground text-lg">No jobs available at the moment.</p>
+                </div>
+              ) : (
+                dbJobs.map((job) => (
+                  <JobCard key={job.id} job={job} onDelete={deleteJob} />
+                ))
+              )}
             </div>
           </TabsContent>
 
           <TabsContent value="freelancers">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {freelancers.map((freelancer) => (
-                <Card key={freelancer.id} className="glass border-white/10 project-card">
-                  <CardHeader className="text-center">
-                    <div className="w-16 h-16 rounded-full bg-gradient-to-r from-primary to-blue-500 p-0.5 mx-auto mb-4">
-                      <div className="w-full h-full rounded-full bg-card flex items-center justify-center">
-                        <User className="w-8 h-8 text-primary" />
-                      </div>
-                    </div>
-                    <CardTitle className="text-lg">{freelancer.name}</CardTitle>
-                    <p className="text-muted-foreground text-sm">{freelancer.title}</p>
-                    
-                    <div className="flex items-center justify-center space-x-4 mt-2">
-                      <div className="flex items-center">
-                        <Star className="w-4 h-4 text-yellow-500 mr-1" />
-                        <span className="text-sm font-medium">{freelancer.rating}</span>
-                        <span className="text-xs text-muted-foreground ml-1">({freelancer.reviews})</span>
-                      </div>
-                      <div className="flex items-center">
-                        <DollarSign className="w-4 h-4 text-green-500 mr-1" />
-                        <span className="text-sm font-medium">${freelancer.hourlyRate}/hr</span>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  
-                  <CardContent>
-                    <div className="flex flex-wrap gap-1 mb-4">
-                      {freelancer.skills.slice(0, 3).map((skill) => (
-                        <Badge key={skill} variant="outline" className="text-xs">
-                          {skill}
-                        </Badge>
-                      ))}
-                      {freelancer.skills.length > 3 && (
-                        <Badge variant="outline" className="text-xs">
-                          +{freelancer.skills.length - 3}
-                        </Badge>
-                      )}
-                    </div>
-                    
-                    <div className="flex items-center text-sm text-muted-foreground mb-3">
-                      <MapPin className="w-4 h-4 mr-2" />
-                      {freelancer.location}
-                    </div>
-                    
-                    <p className="text-sm text-muted-foreground mb-4">{freelancer.portfolio}</p>
-                    
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center">
-                        <div className={`w-2 h-2 rounded-full mr-2 ${freelancer.available ? 'bg-green-500' : 'bg-red-500'}`}></div>
-                        <span className="text-xs text-muted-foreground">
-                          {freelancer.available ? 'Available' : 'Busy'}
-                        </span>
-                      </div>
-                      <Button size="sm" className="glow-hover bg-primary hover:bg-primary/90">
-                        Hire Now
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+              {talentsLoading ? (
+                <div className="col-span-full text-center py-12">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+                  <p className="mt-4 text-muted-foreground">Loading talents...</p>
+                </div>
+              ) : talents.length === 0 ? (
+                <div className="col-span-full text-center py-12">
+                  <p className="text-muted-foreground text-lg">No talents available at the moment.</p>
+                </div>
+              ) : (
+                talents.map((talent) => (
+                  <TalentCard key={talent.id} talent={talent} onDelete={deleteTalent} />
+                ))
+              )}
             </div>
           </TabsContent>
         </Tabs>

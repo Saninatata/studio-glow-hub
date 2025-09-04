@@ -126,12 +126,30 @@ export function usePosts() {
     }
   };
 
+  const deletePost = async (postId: string) => {
+    try {
+      const { error } = await supabase
+        .from('posts')
+        .delete()
+        .eq('id', postId)
+
+      if (error) throw error
+      
+      // Refresh posts list
+      await fetchPosts()
+    } catch (error) {
+      console.error('Error deleting post:', error)
+      throw error
+    }
+  }
+
   return {
     posts,
     loading,
     error,
     createPost,
     likePost,
+    deletePost,
     refetch: fetchPosts,
   };
 }
