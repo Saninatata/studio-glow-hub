@@ -32,11 +32,14 @@ export function useTalents() {
 
   const fetchTalents = async () => {
     try {
+      console.log('Fetching talents...');
       setError(null)
       const { data, error } = await supabase
         .from('talents')
         .select('*')
         .order('created_at', { ascending: false })
+
+      console.log('Fetch talents result:', { data, error });
 
       if (error) throw error
       setTalents(data || [])
@@ -58,18 +61,28 @@ export function useTalents() {
     experience?: string
   }) => {
     try {
+      console.log('Creating talent with data:', talentData);
+      
       // Get current authenticated user
       const { data: { user: authUser } } = await supabase.auth.getUser();
+      console.log('Auth user:', authUser);
+      
       if (!authUser) throw new Error('Authentication required');
+
+      const insertData = {
+        ...talentData,
+        user_id: authUser.id
+      };
+      
+      console.log('Insert data:', insertData);
 
       const { data, error } = await supabase
         .from('talents')
-        .insert({
-          ...talentData,
-          user_id: authUser.id
-        })
+        .insert(insertData)
         .select()
         .single()
+
+      console.log('Insert result:', { data, error });
 
       if (error) throw error
       
