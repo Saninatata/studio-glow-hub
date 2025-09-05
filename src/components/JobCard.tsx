@@ -19,10 +19,8 @@ interface Job {
   tags: string[]
   created_at: string
   updated_at: string
-  user?: {
-    full_name: string
-    avatar_url?: string | null
-  } | null
+  user_full_name: string | null
+  user_avatar_url: string | null
 }
 
 interface JobCardProps {
@@ -117,7 +115,7 @@ const JobCard: React.FC<JobCardProps> = ({ job, onDelete }) => {
         
         <div className="flex justify-between items-center">
           <div className="text-sm text-muted-foreground">
-            Posted by <span className="font-medium">{job.company}</span> • {formatTimeAgo(job.created_at)}
+            Posted by <span className="font-medium">{job.user_full_name || 'Unknown User'}</span> • {formatTimeAgo(job.created_at)}
           </div>
           <Button className="glow-hover bg-primary hover:bg-primary/90">
             Apply Now

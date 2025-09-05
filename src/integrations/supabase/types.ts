@@ -383,6 +383,25 @@ export type Database = {
         }
         Returns: string
       }
+      get_jobs_with_users: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          company: string
+          created_at: string
+          description: string
+          id: string
+          job_type: string
+          location: string
+          requirements: string
+          salary: string
+          tags: string[]
+          title: string
+          updated_at: string
+          user_avatar_url: string
+          user_full_name: string
+          user_id: string
+        }[]
+      }
       get_posts_with_users: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -417,6 +436,24 @@ export type Database = {
           user_full_name: string
           user_id: string
           views_count: number
+        }[]
+      }
+      get_talents_with_users: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          availability: string
+          created_at: string
+          description: string
+          experience: string
+          hourly_rate: string
+          id: string
+          location: string
+          skills: string[]
+          title: string
+          updated_at: string
+          user_avatar_url: string
+          user_full_name: string
+          user_id: string
         }[]
       }
     }

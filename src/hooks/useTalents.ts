@@ -14,10 +14,8 @@ interface Talent {
   experience: string | null
   created_at: string
   updated_at: string
-  user?: {
-    full_name: string
-    avatar_url?: string | null
-  } | null
+  user_full_name: string | null
+  user_avatar_url: string | null
 }
 
 export function useTalents() {
@@ -40,9 +38,7 @@ export function useTalents() {
       console.log('Fetching talents...');
       setError(null)
       const { data, error } = await supabase
-        .from('talents')
-        .select('*')
-        .order('created_at', { ascending: false })
+        .rpc('get_talents_with_users')
 
       console.log('Fetch talents result:', { data, error });
 

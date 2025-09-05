@@ -15,10 +15,8 @@ interface Job {
   tags: string[]
   created_at: string
   updated_at: string
-  user?: {
-    full_name: string
-    avatar_url?: string | null
-  } | null
+  user_full_name: string | null
+  user_avatar_url: string | null
 }
 
 export function useJobs() {
@@ -40,9 +38,7 @@ export function useJobs() {
     try {
       setError(null)
       const { data, error } = await supabase
-        .from('jobs')
-        .select('*')
-        .order('created_at', { ascending: false })
+        .rpc('get_jobs_with_users')
 
       if (error) throw error
       setJobs(data || [])

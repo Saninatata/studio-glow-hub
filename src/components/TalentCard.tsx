@@ -18,10 +18,8 @@ interface Talent {
   experience: string | null
   created_at: string
   updated_at: string
-  user?: {
-    full_name: string
-    avatar_url?: string | null
-  } | null
+  user_full_name: string | null
+  user_avatar_url: string | null
 }
 
 interface TalentCardProps {
@@ -70,7 +68,7 @@ const TalentCard: React.FC<TalentCardProps> = ({ talent, onDelete }) => {
             </Button>
           )}
         </div>
-        <CardTitle className="text-lg">{talent.user?.full_name || 'Unknown User'}</CardTitle>
+        <CardTitle className="text-lg">{talent.user_full_name || 'Unknown User'}</CardTitle>
         <p className="text-muted-foreground text-sm">{talent.title}</p>
         
         <div className="flex items-center justify-center space-x-4 mt-2">
