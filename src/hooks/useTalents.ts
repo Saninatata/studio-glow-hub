@@ -27,7 +27,12 @@ export function useTalents() {
   const { user } = useAuth()
 
   useEffect(() => {
-    fetchTalents()
+    fetchTalents();
+    const handleUpdated = () => fetchTalents();
+    window.addEventListener('talents:updated', handleUpdated);
+    return () => {
+      window.removeEventListener('talents:updated', handleUpdated);
+    };
   }, [])
 
   const fetchTalents = async () => {
@@ -88,6 +93,8 @@ export function useTalents() {
       
       // Refresh talents list
       await fetchTalents()
+      // Notify other parts of the app
+      window.dispatchEvent(new Event('talents:updated'))
       
       return data
     } catch (error) {
@@ -107,6 +114,8 @@ export function useTalents() {
       
       // Refresh talents list
       await fetchTalents()
+      // Notify other parts of the app
+      window.dispatchEvent(new Event('talents:updated'))
     } catch (error) {
       console.error('Error deleting talent:', error)
       throw error

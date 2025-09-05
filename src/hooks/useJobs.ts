@@ -28,7 +28,12 @@ export function useJobs() {
   const { user } = useAuth()
 
   useEffect(() => {
-    fetchJobs()
+    fetchJobs();
+    const handleUpdated = () => fetchJobs();
+    window.addEventListener('jobs:updated', handleUpdated);
+    return () => {
+      window.removeEventListener('jobs:updated', handleUpdated);
+    };
   }, [])
 
   const fetchJobs = async () => {
@@ -77,6 +82,8 @@ export function useJobs() {
       
       // Refresh jobs list
       await fetchJobs()
+      // Notify other parts of the app
+      window.dispatchEvent(new Event('jobs:updated'))
       
       return data
     } catch (error) {
@@ -96,6 +103,8 @@ export function useJobs() {
       
       // Refresh jobs list
       await fetchJobs()
+      // Notify other parts of the app
+      window.dispatchEvent(new Event('jobs:updated'))
     } catch (error) {
       console.error('Error deleting job:', error)
       throw error
