@@ -8,6 +8,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
 import Header from '@/components/Header';
 import BottomNavigation from '@/components/BottomNavigation';
+import UserProfile from '@/components/UserProfile';
+import ExpandableText from '@/components/ExpandableText';
 import { useAuth } from '@/hooks/useAuth';
 import { usePosts } from '@/hooks/usePosts';
 import { useToast } from '@/hooks/use-toast';
@@ -147,24 +149,12 @@ const Posts = () => {
               <Card key={post.id} className="glass border-white/10 project-card">
                 <CardHeader>
                   <div className="flex items-start justify-between">
-                    <div className="flex items-center space-x-3">
-                      <Avatar>
-                        <AvatarImage src={post.user?.avatar_url || ''} />
-                        <AvatarFallback>
-                          {post.user?.full_name?.charAt(0) || 'U'}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <div className="flex items-center space-x-2">
-                          <h3 className="font-semibold">
-                            {post.user?.full_name || 'Unknown User'}
-                          </h3>
-                        </div>
-                        <p className="text-sm text-muted-foreground">
-                          {formatTimeAgo(post.created_at)}
-                        </p>
-                      </div>
-                    </div>
+                    <UserProfile
+                      userId={post.user_id}
+                      fullName={post.user_full_name}
+                      avatarUrl={post.user_avatar_url}
+                      showTime={formatTimeAgo(post.created_at)}
+                    />
                     {user && user.id === post.user_id && (
                       <Button 
                         variant="ghost" 
@@ -179,7 +169,11 @@ const Posts = () => {
                 </CardHeader>
                 
                 <CardContent className="space-y-4">
-                  <p className="text-foreground leading-relaxed">{post.content}</p>
+                  <ExpandableText 
+                    text={post.content} 
+                    maxLength={200}
+                    className="text-foreground leading-relaxed"
+                  />
                   
                   {post.image_url && (
                     <div className="rounded-lg overflow-hidden">

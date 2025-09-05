@@ -15,12 +15,8 @@ interface Project {
   views_count: number
   created_at: string
   updated_at: string
-  user_full_name?: string
-  user_avatar_url?: string
-  user?: {
-    full_name: string
-    avatar_url?: string | null
-  }
+  user_full_name: string | null
+  user_avatar_url: string | null
 }
 
 export function useProjects() {
@@ -41,16 +37,7 @@ export function useProjects() {
 
       if (error) throw error
       
-      // Transform data to include user object
-      const transformedProjects = (data || []).map(project => ({
-        ...project,
-        user: project.user_full_name ? {
-          full_name: project.user_full_name,
-          avatar_url: project.user_avatar_url
-        } : undefined
-      }))
-      
-      setProjects(transformedProjects)
+      setProjects(data || [])
     } catch (error) {
       console.error('Error fetching projects:', error)
       setError(error instanceof Error ? error.message : 'Failed to fetch projects')

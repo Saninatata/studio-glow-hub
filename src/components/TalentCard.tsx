@@ -3,6 +3,8 @@ import { Star, MapPin, Clock, DollarSign, User, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import UserProfile from '@/components/UserProfile';
+import ExpandableText from '@/components/ExpandableText';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 
@@ -50,13 +52,13 @@ const TalentCard: React.FC<TalentCardProps> = ({ talent, onDelete }) => {
 
   return (
     <Card className="glass border-white/10 project-card">
-      <CardHeader className="text-center">
-        <div className="flex justify-between items-start mb-4">
-          <div className="w-16 h-16 rounded-full bg-gradient-to-r from-primary to-blue-500 p-0.5 mx-auto">
-            <div className="w-full h-full rounded-full bg-card flex items-center justify-center">
-              <User className="w-8 h-8 text-primary" />
-            </div>
-          </div>
+      <CardHeader>
+        <div className="flex items-start justify-between">
+          <UserProfile
+            userId={talent.user_id}
+            fullName={talent.user_full_name}
+            avatarUrl={talent.user_avatar_url}
+          />
           {user && user.id === talent.user_id && (
             <Button 
               variant="ghost" 
@@ -68,27 +70,15 @@ const TalentCard: React.FC<TalentCardProps> = ({ talent, onDelete }) => {
             </Button>
           )}
         </div>
-        <CardTitle className="text-lg">{talent.user_full_name || 'Unknown User'}</CardTitle>
-        <p className="text-muted-foreground text-sm">{talent.title}</p>
-        
-        <div className="flex items-center justify-center space-x-4 mt-2">
-          {talent.hourly_rate && (
-            <div className="flex items-center">
-              <DollarSign className="w-4 h-4 text-green-500 mr-1" />
-              <span className="text-sm font-medium">{talent.hourly_rate}/hr</span>
-            </div>
-          )}
-          {talent.availability && (
-            <div className="flex items-center">
-              <Clock className="w-4 h-4 text-blue-500 mr-1" />
-              <span className="text-sm">{talent.availability}</span>
-            </div>
-          )}
-        </div>
+        <CardTitle className="text-lg">{talent.title}</CardTitle>
       </CardHeader>
       
       <CardContent>
-        <p className="text-sm text-muted-foreground mb-4">{talent.description}</p>
+        <ExpandableText 
+          text={talent.description}
+          maxLength={100}
+          className="text-muted-foreground mb-4"
+        />
         
         <div className="flex flex-wrap gap-1 mb-4">
           {talent.skills.slice(0, 3).map((skill) => (
@@ -103,12 +93,28 @@ const TalentCard: React.FC<TalentCardProps> = ({ talent, onDelete }) => {
           )}
         </div>
         
-        {talent.location && (
-          <div className="flex items-center text-sm text-muted-foreground mb-3">
-            <MapPin className="w-4 h-4 mr-2" />
-            {talent.location}
-          </div>
-        )}
+        <div className="space-y-2 mb-4">
+          {talent.hourly_rate && (
+            <div className="flex items-center text-sm">
+              <DollarSign className="w-4 h-4 text-green-500 mr-2" />
+              <span className="font-medium">{talent.hourly_rate}/hr</span>
+            </div>
+          )}
+          
+          {talent.availability && (
+            <div className="flex items-center text-sm">
+              <Clock className="w-4 h-4 text-blue-500 mr-2" />
+              <span>{talent.availability}</span>
+            </div>
+          )}
+          
+          {talent.location && (
+            <div className="flex items-center text-sm">
+              <MapPin className="w-4 h-4 text-purple-500 mr-2" />
+              <span>{talent.location}</span>
+            </div>
+          )}
+        </div>
         
         <div className="flex items-center justify-between">
           <div className="flex items-center">

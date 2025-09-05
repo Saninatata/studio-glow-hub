@@ -32,10 +32,8 @@ interface Post {
   shares_count: number;
   created_at: string;
   updated_at: string;
-  user?: {
-    full_name: string;
-    avatar_url?: string | null;
-  };
+  user_full_name: string | null;
+  user_avatar_url: string | null;
 }
 
 export function usePosts() {
@@ -69,10 +67,8 @@ export function usePosts() {
         shares_count: post.shares_count || 0,
         created_at: post.created_at,
         updated_at: post.updated_at,
-        user: post.user_full_name ? {
-          full_name: post.user_full_name,
-          avatar_url: post.user_avatar_url
-        } : undefined
+        user_full_name: post.user_full_name,
+        user_avatar_url: post.user_avatar_url
       }));
       
       setPosts(transformedPosts);
