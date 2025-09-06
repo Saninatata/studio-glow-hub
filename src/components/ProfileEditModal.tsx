@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { X, Save, Upload, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -191,8 +192,8 @@ const ProfileEditModal = ({ isOpen, onClose }: ProfileEditModalProps) => {
 
   if (!isOpen) return null;
 
-  return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
+  return createPortal(
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[100] p-4 overflow-y-auto">
       <div className="bg-card rounded-lg border max-w-2xl w-full min-h-fit my-auto mx-auto overflow-y-auto max-h-[95vh]">
         <div className="flex items-center justify-between p-6 border-b">
           <h2 className="text-xl font-semibold">Edit Profile</h2>
@@ -359,7 +360,8 @@ const ProfileEditModal = ({ isOpen, onClose }: ProfileEditModalProps) => {
           </Button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 
