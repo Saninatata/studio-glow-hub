@@ -185,9 +185,14 @@ const Header = () => {
             )}
           </div>
 
-          {/* Mobile Auth Button (when not authenticated) */}
-          {!user && !loading && (
-            <div className="md:hidden">
+          {/* Mobile Actions */}
+          <div className="md:hidden flex items-center space-x-2">
+            {user ? (
+              <>
+                <NotificationButton />
+                <ProfileButton />
+              </>
+            ) : !loading && (
               <Link to="/auth">
                 <Button 
                   className="glow-hover bg-primary hover:bg-primary/90"
@@ -196,8 +201,8 @@ const Header = () => {
                   Join
                 </Button>
               </Link>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </header>
 

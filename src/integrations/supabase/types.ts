@@ -201,6 +201,54 @@ export type Database = {
         }
         Relationships: []
       }
+      post_comments: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          post_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          post_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          post_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      post_likes: {
+        Row: {
+          created_at: string
+          id: string
+          post_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          post_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          post_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       posts: {
         Row: {
           comments_count: number | null
@@ -479,6 +527,10 @@ export type Database = {
         }
         Returns: string
       }
+      create_post_comment: {
+        Args: { content_param: string; post_id_param: string }
+        Returns: string
+      }
       get_jobs_with_users: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -551,6 +603,10 @@ export type Database = {
           user_full_name: string
           user_id: string
         }[]
+      }
+      toggle_post_like: {
+        Args: { post_id_param: string }
+        Returns: boolean
       }
     }
     Enums: {

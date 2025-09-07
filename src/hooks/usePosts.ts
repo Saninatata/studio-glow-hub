@@ -114,11 +114,37 @@ export function usePosts() {
     if (!user) return;
 
     try {
-      // Toggle like logic would go here
-      // For now, just refresh posts
+      const { error } = await supabase.rpc('toggle_post_like', { 
+        post_id_param: postId 
+      });
+      
+      if (error) throw error;
+      
+      // Refresh posts to get updated counts
       await fetchPosts();
     } catch (error) {
       console.error('Error toggling like:', error);
+      throw error;
+    }
+  };
+
+  const sharePost = async (postId: string) => {
+    if (!user) return;
+
+    try {
+      // Update share count
+      const { error } = await supabase
+        .from('posts')
+        .update({ shares_count: (supabase as any).raw('shares_count + 1') })
+        .eq('id', postId);
+      
+      if (error) throw error;
+      
+      // Refresh posts to get updated counts
+      await fetchPosts();
+    } catch (error) {
+      console.error('Error sharing post:', error);
+      throw error;
     }
   };
 
@@ -145,6 +171,7 @@ export function usePosts() {
     error,
     createPost,
     likePost,
+    sharePost,
     deletePost,
     refetch: fetchPosts,
   };

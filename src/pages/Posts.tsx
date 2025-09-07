@@ -10,14 +10,20 @@ import Header from '@/components/Header';
 import BottomNavigation from '@/components/BottomNavigation';
 import UserProfile from '@/components/UserProfile';
 import ExpandableText from '@/components/ExpandableText';
+import CommentModal from '@/components/CommentModal';
 import { useAuth } from '@/hooks/useAuth';
 import { usePosts } from '@/hooks/usePosts';
 import { useToast } from '@/hooks/use-toast';
 
 const Posts = () => {
   const [newPost, setNewPost] = useState('');
+  const [commentModal, setCommentModal] = useState<{ isOpen: boolean; postId: string; postContent: string }>({
+    isOpen: false,
+    postId: '',
+    postContent: '',
+  });
   const { user } = useAuth();
-  const { posts, loading, createPost, deletePost } = usePosts();
+  const { posts, loading, createPost, likePost, sharePost, deletePost } = usePosts();
   const { toast } = useToast();
   const [posting, setPosting] = useState(false);
 
@@ -66,6 +72,44 @@ const Posts = () => {
         variant: "destructive",
       });
     }
+  };
+
+  const handleLikePost = async (postId: string) => {
+    try {
+      await likePost(postId);
+    } catch (error) {
+      toast({
+        title: "Error liking post",
+        description: "Please try again later.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleSharePost = async (postId: string) => {
+    try {
+      await sharePost(postId);
+      // Copy link to clipboard
+      await navigator.clipboard.writeText(`${window.location.origin}/posts/${postId}`);
+      toast({
+        title: "Post shared!",
+        description: "Link copied to clipboard.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error sharing post",
+        description: "Please try again later.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const openCommentModal = (postId: string, postContent: string) => {
+    setCommentModal({ isOpen: true, postId, postContent });
+  };
+
+  const closeCommentModal = () => {
+    setCommentModal({ isOpen: false, postId: '', postContent: '' });
   };
 
   const formatTimeAgo = (dateString: string) => {
@@ -188,22 +232,37 @@ const Posts = () => {
                   <Separator />
                   
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-6">
-                      <Button variant="ghost" size="sm" className="hover:text-red-400">
-                        <Heart className="w-4 h-4 mr-2" />
-                        {post.likes_count || 0}
-                      </Button>
-                      
-                      <Button variant="ghost" size="sm" className="hover:text-blue-400">
-                        <MessageCircle className="w-4 h-4 mr-2" />
-                        {post.comments_count || 0}
-                      </Button>
-                      
-                      <Button variant="ghost" size="sm" className="hover:text-green-400">
-                        <Share2 className="w-4 h-4 mr-2" />
-                        {post.shares_count || 0}
-                      </Button>
-                    </div>
+                     <div className="flex items-center space-x-6">
+                       <Button 
+                         variant="ghost" 
+                         size="sm" 
+                         className="hover:text-red-400"
+                         onClick={() => handleLikePost(post.id)}
+                       >
+                         <Heart className="w-4 h-4 mr-2" />
+                         {post.likes_count || 0}
+                       </Button>
+                       
+                       <Button 
+                         variant="ghost" 
+                         size="sm" 
+                         className="hover:text-blue-400"
+                         onClick={() => openCommentModal(post.id, post.content)}
+                       >
+                         <MessageCircle className="w-4 h-4 mr-2" />
+                         {post.comments_count || 0}
+                       </Button>
+                       
+                       <Button 
+                         variant="ghost" 
+                         size="sm" 
+                         className="hover:text-green-400"
+                         onClick={() => handleSharePost(post.id)}
+                       >
+                         <Share2 className="w-4 h-4 mr-2" />
+                         {post.shares_count || 0}
+                       </Button>
+                     </div>
                     
                     <Button variant="ghost" size="sm" className="hover:text-yellow-400">
                       <Bookmark className="w-4 h-4" />
@@ -226,6 +285,17 @@ const Posts = () => {
       </div>
 
       <BottomNavigation />
+      
+      <CommentModal
+        isOpen={commentModal.isOpen}
+        onClose={closeCommentModal}
+        postId={commentModal.postId}
+        postContent={commentModal.postContent}
+        onCommentAdded={() => {
+          // Refresh posts to update comment count
+          window.location.reload();
+        }}
+      />
     </div>
   );
 };
