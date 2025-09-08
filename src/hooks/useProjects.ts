@@ -82,30 +82,14 @@ export function useProjects() {
     if (!user) return
 
     try {
-      // Check if already liked
-      const { data: existingLike } = await supabase
-        .from('project_likes')
-        .select('id')
-        .eq('project_id', projectId)
-        .eq('user_id', user.id)
-        .single()
-
-      if (existingLike) {
-        // Unlike
-        await supabase
-          .from('project_likes')
-          .delete()
-          .eq('project_id', projectId)
-          .eq('user_id', user.id)
-      } else {
-        // Like
-        await supabase
-          .from('project_likes')
-          .insert({ project_id: projectId, user_id: user.id })
-      }
-
+      const { error } = await supabase.rpc('toggle_project_like', { 
+        project_id_param: projectId 
+      });
+      
+      if (error) throw error;
+      
       // Refresh projects
-      fetchProjects()
+      await fetchProjects();
     } catch (error) {
       console.error('Error toggling like:', error)
     }

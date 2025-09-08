@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { Star, MapPin, Clock, DollarSign, User, Trash2 } from 'lucide-react';
+import { Star, MapPin, Clock, DollarSign, User, Trash2, MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import UserProfile from '@/components/UserProfile';
 import ExpandableText from '@/components/ExpandableText';
 import HireRequestModal from '@/components/HireRequestModal';
+import StartConversationModal from '@/components/StartConversationModal';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 
@@ -34,6 +35,7 @@ const TalentCard: React.FC<TalentCardProps> = ({ talent, onDelete }) => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [isHireModalOpen, setIsHireModalOpen] = useState(false);
+  const [showMessageModal, setShowMessageModal] = useState(false);
 
   const handleDelete = async () => {
     if (!onDelete) return;
@@ -125,13 +127,23 @@ const TalentCard: React.FC<TalentCardProps> = ({ talent, onDelete }) => {
               <span className="text-xs text-muted-foreground">Available</span>
             </div>
             {user && user.id !== talent.user_id ? (
-              <Button 
-                size="sm" 
-                className="glow-hover bg-primary hover:bg-primary/90"
-                onClick={() => setIsHireModalOpen(true)}
-              >
-                Hire Now
-              </Button>
+              <div className="flex gap-2">
+                <Button 
+                  size="sm" 
+                  variant="outline"
+                  onClick={() => setShowMessageModal(true)}
+                >
+                  <MessageCircle className="w-4 h-4 mr-2" />
+                  Message
+                </Button>
+                <Button 
+                  size="sm" 
+                  className="glow-hover bg-primary hover:bg-primary/90"
+                  onClick={() => setIsHireModalOpen(true)}
+                >
+                  Hire Now
+                </Button>
+              </div>
             ) : null}
           </div>
         </CardContent>
@@ -144,6 +156,13 @@ const TalentCard: React.FC<TalentCardProps> = ({ talent, onDelete }) => {
         talentTitle={talent.title}
         talentUserId={talent.user_id}
         talentName={talent.user_full_name || 'Unknown User'}
+      />
+      
+      <StartConversationModal
+        isOpen={showMessageModal}
+        onClose={() => setShowMessageModal(false)}
+        recipientId={talent.user_id}
+        recipientName={talent.user_full_name || 'Unknown User'}
       />
     </>
   );

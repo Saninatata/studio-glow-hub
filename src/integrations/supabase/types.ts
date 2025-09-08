@@ -60,6 +60,27 @@ export type Database = {
           },
         ]
       }
+      follows: {
+        Row: {
+          created_at: string
+          follower_id: string
+          following_id: string
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          follower_id: string
+          following_id: string
+          id?: string
+        }
+        Update: {
+          created_at?: string
+          follower_id?: string
+          following_id?: string
+          id?: string
+        }
+        Relationships: []
+      }
       hire_requests: {
         Row: {
           created_at: string
@@ -648,8 +669,16 @@ export type Database = {
         Args: { post_id_param: string }
         Returns: boolean
       }
+      toggle_follow: {
+        Args: { target_user_id: string }
+        Returns: boolean
+      }
       toggle_post_like: {
         Args: { post_id_param: string }
+        Returns: boolean
+      }
+      toggle_project_like: {
+        Args: { project_id_param: string }
         Returns: boolean
       }
     }

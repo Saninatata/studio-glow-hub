@@ -2,9 +2,11 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { MessageCircle, Clock } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { MessageCircle, Clock, Plus } from 'lucide-react';
 import { useMessages } from '@/hooks/useMessages';
 import ConversationModal from './ConversationModal';
+import StartConversationModal from './StartConversationModal';
 
 const ConversationsList: React.FC = () => {
   const { conversations, loading } = useMessages();
@@ -13,6 +15,7 @@ const ConversationsList: React.FC = () => {
     userName: string;
     userAvatar?: string;
   } | null>(null);
+  const [showStartModal, setShowStartModal] = React.useState(false);
 
   const formatTimeAgo = (dateString: string) => {
     const date = new Date(dateString);
@@ -29,11 +32,19 @@ const ConversationsList: React.FC = () => {
   return (
     <>
       <Card>
-        <CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="flex items-center gap-2">
             <MessageCircle className="h-5 w-5" />
             Recent Conversations
           </CardTitle>
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => setShowStartModal(true)}
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            New
+          </Button>
         </CardHeader>
         <CardContent>
           {loading ? (
@@ -107,6 +118,11 @@ const ConversationsList: React.FC = () => {
           recipientAvatar={selectedConversation.userAvatar}
         />
       )}
+      
+      <StartConversationModal
+        isOpen={showStartModal}
+        onClose={() => setShowStartModal(false)}
+      />
     </>
   );
 };
