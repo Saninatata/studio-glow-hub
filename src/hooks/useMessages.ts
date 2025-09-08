@@ -35,7 +35,7 @@ export function useMessages() {
       setLoading(true);
       setError(null);
 
-      const { data, error } = await supabase.rpc('get_user_conversations') as { data: Conversation[] | null, error: any };
+      const { data, error } = await supabase.rpc('get_user_conversations' as any) as { data: Conversation[] | null, error: any };
       
       if (error) throw error;
       
