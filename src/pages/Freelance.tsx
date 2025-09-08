@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Search, Filter, MapPin, Star, Clock, DollarSign, Briefcase, User } from 'lucide-react';
+import { Search, Filter, MapPin, Star, Clock, DollarSign, Briefcase, User, MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Header from '@/components/Header';
 import TalentCard from '@/components/TalentCard';
 import JobCard from '@/components/JobCard';
+import ConversationsList from '@/components/ConversationsList';
 import { useAuth } from '@/hooks/useAuth';
 import { useJobs } from '@/hooks/useJobs';
 import { useTalents } from '@/hooks/useTalents';
@@ -183,7 +184,7 @@ const Freelance = () => {
 
         {/* Tabs */}
         <Tabs defaultValue="jobs" className="w-full">
-          <TabsList className="grid w-full max-w-md mx-auto grid-cols-2 mb-8 bg-secondary">
+          <TabsList className="grid w-full max-w-lg mx-auto grid-cols-3 mb-8 bg-secondary">
             <TabsTrigger value="jobs" className="data-[state=active]:bg-primary">
               <Briefcase className="w-4 h-4 mr-2" />
               Find Jobs
@@ -191,6 +192,10 @@ const Freelance = () => {
             <TabsTrigger value="freelancers" className="data-[state=active]:bg-primary">
               <User className="w-4 h-4 mr-2" />
               Find Talent
+            </TabsTrigger>
+            <TabsTrigger value="conversations" className="data-[state=active]:bg-primary">
+              <MessageCircle className="w-4 h-4 mr-2" />
+              Messages
             </TabsTrigger>
           </TabsList>
 
@@ -230,6 +235,10 @@ const Freelance = () => {
                 ))
               )}
             </div>
+          </TabsContent>
+
+          <TabsContent value="conversations">
+            <ConversationsList />
           </TabsContent>
         </Tabs>
       </div>

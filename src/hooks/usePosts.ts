@@ -132,11 +132,9 @@ export function usePosts() {
     if (!user) return;
 
     try {
-      // Update share count
-      const { error } = await supabase
-        .from('posts')
-        .update({ shares_count: (supabase as any).raw('shares_count + 1') })
-        .eq('id', postId);
+      const { error } = await supabase.rpc('share_post', { 
+        post_id_param: postId 
+      });
       
       if (error) throw error;
       
