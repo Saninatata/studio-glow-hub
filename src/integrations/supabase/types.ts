@@ -48,13 +48,6 @@ export type Database = {
             foreignKeyName: "comments_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: "user_public_profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "comments_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
           },
@@ -345,13 +338,6 @@ export type Database = {
             foreignKeyName: "posts_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: "user_public_profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "posts_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
           },
@@ -382,13 +368,6 @@ export type Database = {
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "projects"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "project_likes_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "user_public_profiles"
             referencedColumns: ["id"]
           },
           {
@@ -445,13 +424,6 @@ export type Database = {
             foreignKeyName: "projects_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: "user_public_profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "projects_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
           },
@@ -496,6 +468,27 @@ export type Database = {
           title?: string
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      user_public_profiles: {
+        Row: {
+          avatar_url: string | null
+          full_name: string | null
+          id: string
+          username: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          full_name?: string | null
+          id: string
+          username?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          full_name?: string | null
+          id?: string
+          username?: string | null
         }
         Relationships: []
       }
@@ -546,27 +539,7 @@ export type Database = {
       }
     }
     Views: {
-      user_public_profiles: {
-        Row: {
-          avatar_url: string | null
-          full_name: string | null
-          id: string | null
-          username: string | null
-        }
-        Insert: {
-          avatar_url?: string | null
-          full_name?: string | null
-          id?: string | null
-          username?: string | null
-        }
-        Update: {
-          avatar_url?: string | null
-          full_name?: string | null
-          id?: string | null
-          username?: string | null
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Functions: {
       create_notification: {
